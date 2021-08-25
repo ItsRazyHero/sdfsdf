@@ -4,11 +4,13 @@ import asyncio
 import requests
 from bs4 import BeautifulSoup as BS
 
+# parser connection
 r = requests.get("https://randstuff.ru/saying/")
 html = BS(r.content, "html.parser")
 r1 = requests.get("https://randstuff.ru/fact/")
 html1 = BS(r1.content, "html.parser")
 
+# getting text btw it's just an example
 for el in html.select('#saying'):
     title = el.select('td')
 aboba = str(title)[5:str(title).find('.')+1]
@@ -21,7 +23,7 @@ aboba = str(title)[5:str(title).find('.')+1]
 #        WorldLevel += 1
 #        WorldPoints = 0
 
-
+#main body
 class MyClient(discord.Client):
     async def on_ready(self):
         print('Залогинился как:')
@@ -30,24 +32,21 @@ class MyClient(discord.Client):
         print('------')
 
     async def on_message(self, message):
-
         if message.author.id == self.user.id:
             return
+#command that post a citate form random org site 
         if message.content.startswith('+cit'):
             for el in html.select('#saying'):
                 title = el.select('td')
             aboba = str(title)[5:str(title).find('.')+1]
             await message.channel.send(aboba)
-
+#command that post a fact from random org site
         if message.content.startswith('+fact'):
             for el in html1.select('#fact'):
                 title = el.select('td')
             avtobus = str(title)[5:str(title).find('.')+1]
             await message.channel.send(avtobus)
-            
-        if message.content.startswith('+debug-info'):
-            await message.channel.send(str(self.user.id) + 'ODI2NzI2MjM3NTIyMzYyMzc4.YGQqzg.s9QRL91OQ3mdymQNMOihRgucVnQ')
-
+#dead-inside command
         if message.content.startswith('+1000-7'):
             counter = 1000
             mescon = ''
@@ -59,7 +58,7 @@ class MyClient(discord.Client):
                 counter -= 7
         if message.content.startswith('+x'):
             await message.channel.send('!store')
-                 
+#other commands
         if message.content.startswith('+привет'):
             await message.reply('Привет!', mention_author=True)
 
