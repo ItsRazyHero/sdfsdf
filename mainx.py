@@ -58,6 +58,9 @@ class MyClient(discord.Client):
                 counter -= 7
         if message.content.startswith('+x'):
             await message.channel.send('!store')
+#new 8ball command
+        if message.content.startswith('+8ball'):
+            await message.channel.send(answers[random.randint(0, len(answers)-1)])
 #other commands
         if message.content.startswith('+привет'):
             await message.reply('Привет!', mention_author=True)
