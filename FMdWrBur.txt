@@ -1,279 +1,214 @@
 from tkinter import *
 from tkinter import messagebox
 
-global a1, a2, a3, a4, a5, a6, a7, a8, aa1, aa2, aa3, aa4, aa5, aa6, aa7, aa8, aaa1, aaa2, aaa3, aaa4, aaa5, aaa6, aaa7, aaa8
 def calculate_bmi():
-   a1 = int(a1_tf.get())
-   a2 = int(a2_tf.get())
-   a3 = int(a3_tf.get())
-   a4 = int(a4_tf.get())
-   a5 = int(a5_tf.get())
-   a6 = int(a6_tf.get())
-   a7 = int(a7_tf.get())
-   a8 = int(a8_tf.get())
-   aa1 = int(aa1_tf.get())
-   aa2 = int(aa2_tf.get())
-   aa3 = int(aa3_tf.get())
-   aa4 = int(aa4_tf.get())
-   aa5 = int(aa5_tf.get())
-   aa6 = int(aa6_tf.get())
-   aa7 = int(aa7_tf.get())
-   aa8 = int(aa8_tf.get())
-   aaa1 = int(aaa1_tf.get())
-   aaa2 = int(aaa2_tf.get())
-   aaa3 = int(aaa3_tf.get())
-   aaa4 = int(aaa4_tf.get())
-   aaa5 = int(aaa5_tf.get())
-   aaa6 = int(aaa6_tf.get())
-   aaa7 = int(aaa7_tf.get())
-   aaa8 = int(aaa8_tf.get())
-   
-   
-def clear():
-    a1_tf.delete(0, END)
-    a2_tf.delete(0, END)
-    a3_tf.delete(0, END)
-    a4_tf.delete(0, END)
-    a5_tf.delete(0, END)
-    a6_tf.delete(0, END)
-    a7_tf.delete(0, END)
-    a8_tf.delete(0, END)
-    aa1_tf.delete(0, END)
-    aa2_tf.delete(0, END)
-    aa3_tf.delete(0, END)
-    aa4_tf.delete(0, END)
-    aa5_tf.delete(0, END)
-    aa6_tf.delete(0, END)
-    aa7_tf.delete(0, END)
-    aa8_tf.delete(0, END)
-    aaa1_tf.delete(0, END)
-    aaa2_tf.delete(0, END)
-    aaa3_tf.delete(0, END)
-    aaa4_tf.delete(0, END)
-    aaa5_tf.delete(0, END)
-    aaa6_tf.delete(0, END)
-    aaa7_tf.delete(0, END)
-    aaa8_tf.delete(0, END)
-    aaaa1_tf.delete(0, END)
-    aaaa2_tf.delete(0, END)
-    aaaa3_tf.delete(0, END)
-    aaaa4_tf.delete(0, END)
-    aaaa5_tf.delete(0, END)
-    aaaa6_tf.delete(0, END)
-    aaaa7_tf.delete(0, END)
-    aaaa8_tf.delete(0, END)
-   
+   avgs = [((float(aaaa1_tf.get()) + float(aaa1_tf.get())) / 2), ((float(aaaa2_tf.get()) + float(aaa2_tf.get())) / 2), ((float(aaaa3_tf.get()) + float(aaa3_tf.get())) / 2), ((float(aaaa4_tf.get()) + float(aaa4_tf.get())) / 2), ((float(aaaa5_tf.get()) + float(aaa5_tf.get())) / 2), ((float(aaaa6_tf.get()) + float(aaa6_tf.get())) / 2), ((float(aaaa7_tf.get()) + float(aaa7_tf.get())) / 2), ((float(aaaa8_tf.get()) + float(aaa8_tf.get())) / 2)]
+   average.configure(text = str(avgs[0]))
+   average1.configure(text = str(avgs[1]))
+   average2.configure(text = str(avgs[2]))
+   average3.configure(text = str(avgs[3]))
+   average4.configure(text = str(avgs[4]))
+   average5.configure(text = str(avgs[5]))
+   average6.configure(text = str(avgs[6]))
+   average7.configure(text = str(avgs[7]))
 
-def display():
-    messagebox.showinfo("GUI Python", napr_entry.get() + " " + krug_entry.get())
+   def calculate_degree(min1, sec1, min2, sec2):
+      total_sec1 = min1 * 60 + sec1
+      total_sec2 = min2 * 60 + sec2
+      average_sec = total_sec1 - total_sec2
+      return average_sec
+
+   aas = [int(aa1_tf.get()), int(aa2_tf.get()), int(aa3_tf.get()), int(aa4_tf.get()), int(aa5_tf.get()), int(aa6_tf.get()), int(aa7_tf.get()), int(aa8_tf.get())]
+
+   note1 = str(calculate_degree(aas[0], avgs[0], aas[1], avgs[1]))
+   lrs.configure(text = note1)
+   
+   note2 = 
 
 root = Tk()
 root.title("GUI на Python")
 
-napr_entry = Entry()
+napr_entry = Label(root, text = 'Направление')
 napr_entry.grid(row=0,column=1)
-napr_entry.insert(0, "Направление")
 
-krug_entry = Entry()
+krug_entry = Label(root, text = 'Круг')
 krug_entry.grid(row=0, column=2)
-krug_entry.insert(0, "Круг")
 
-po_entry = Entry()
+po_entry = Label(root, text = 'По')
 po_entry.grid(row=0, column=3)
-po_entry.insert(0, "По ")
 
-limb_entry = Entry()
+limb_entry = Label(root, text = 'лимбу')
 limb_entry.grid(row=0, column=4)
-limb_entry.insert(0, "Лимбу")
 
-a_entry = Entry()
-a_entry.grid(row=0, column=5)
-a_entry.insert(0, "a1")
+a1_entry = Label(root, text = 'A1')
+a1_entry.grid(row=0, column=5)
 
-aa_entry = Entry()
-aa_entry.grid(row=0, column=6)
-aa_entry.insert(0, "a2")
+a2_entry = Label(root, text = 'A2')
+a2_entry.grid(row=0, column=6)
 
-Sred_entry = Entry()
+Sred_entry = Label(root, text = 'Average')
 Sred_entry.grid(row=0, column=7)
-Sred_entry.insert(0, "Среднее")
 
-LR_entry = Entry()
+LR_entry = Label(root, text = 'L - R')
 LR_entry.grid(row=0, column=8)
-LR_entry.insert(0, "L-R")
 
-Naprav_entry = Entry()
-Naprav_entry.grid(row=0, column=9)
-Naprav_entry.insert(0, "(L+R)/2")
+LR_half = Label(root, text = '(L + R) / 2')
+LR_half.grid(row=0, column=9)
 
-Naprav_entry = Entry()
+Naprav_entry = Label(root, text = 'Direction')
 Naprav_entry.grid(row=0, column=10)
-Naprav_entry.insert(0, "Направление")
 
-YU_entry = Entry()
+YU_entry = Label(root, text = 'Юрьево', justify = CENTER)
 YU_entry.grid(row=1, column=1)
-YU_entry.insert(0, "Юрьево")
 
-pust1_entry = Entry()
+pust1_entry = Label(root)
 pust1_entry.grid(row=2, column=1)
-pust1_entry.insert(0, "")
 
-Kryt_entry = Entry()
+Kryt_entry = Label(root, text = 'Крутик', justify = CENTER)
 Kryt_entry.grid(row=3, column=1)
-Kryt_entry.insert(0, "Крутик")
 
-pust2_entry = Entry()
+pust2_entry = Label()
 pust2_entry.grid(row=4, column=1)
-pust2_entry.insert(0, "")
 
-Lok_entry = Entry()
+Lok_entry = Label(root, text = 'Локно', justify = CENTER)
 Lok_entry.grid(row=5, column=1)
-Lok_entry.insert(0, "Локно")
 
-pust3_entry = Entry()
+pust3_entry = Label()
 pust3_entry.grid(row=6, column=1)
-pust3_entry.insert(0, "")
 
-YUr_entry = Entry()
+YUr_entry = Label(root, text = 'Юрьево')
 YUr_entry.grid(row=7, column=1)
-YUr_entry.insert(0, "Юрьево")
 
-pust4_entry = Entry()
+pust4_entry = Label()
 pust4_entry.grid(row=8, column=1)
-pust4_entry.insert(0, "")
 
-L1_entry = Entry()
-L1_entry.grid(row=1, column=2)
-L1_entry.insert(0, "L")
+for i in range(1, 8, 2):
+   L1_entry = Label(root, text = 'L', justify = CENTER)
+   L1_entry.grid(row=i, column=2)
+for i in range(2, 9, 2):
+   R1_entry = Label(root, text = 'R', justify = CENTER)
+   R1_entry.grid(row=i, column=2)
 
-L2_entry = Entry()
-L2_entry.grid(row=3, column=2)
-L2_entry.insert(0, "L")
-
-L3_entry = Entry()
-L3_entry.grid(row=5, column=2)
-L3_entry.insert(0, "L")
-
-L4_entry = Entry()
-L4_entry.grid(row=7, column=2)
-L4_entry.insert(0, "L")
-
-R1_entry = Entry()
-R1_entry.grid(row=2, column=2)
-R1_entry.insert(0, "R")
-
-R2_entry = Entry()
-R2_entry.grid(row=4, column=2)
-R2_entry.insert(0, "R")
-
-R3_entry = Entry()
-R3_entry.grid(row=6, column=2)
-R3_entry.insert(0, "R")
-
-R4_entry = Entry()
-R4_entry.grid(row=8, column=2)
-R4_entry.insert(0, "R")
-
-a1_tf = Entry()
+#по
+a1_tf = Entry(width = 4)
 a1_tf.grid(row=1, column=3)
 
-a2_tf = Entry()
+a2_tf = Entry(width = 4)
 a2_tf.grid(row=2, column=3)
 
-a3_tf = Entry()
+a3_tf = Entry(width = 4)
 a3_tf.grid(row=3, column=3)
 
-a4_tf = Entry()
+a4_tf = Entry(width = 4)
 a4_tf.grid(row=4, column=3)
 
-a5_tf = Entry()
+a5_tf = Entry(width = 4)
 a5_tf.grid(row=5, column=3)
 
-a6_tf = Entry()
+a6_tf = Entry(width = 4)
 a6_tf.grid(row=6, column=3)
 
-a7_tf = Entry()
+a7_tf = Entry(width = 4)
 a7_tf.grid(row=7, column=3)
 
-a8_tf = Entry()
+a8_tf = Entry(width = 4)
 a8_tf.grid(row=8, column=3)
 
-
-aa1_tf = Entry()
+#лимбу
+aa1_tf = Entry(width = 4)
 aa1_tf.grid(row=1, column=4)
 
-aa2_tf = Entry()
+aa2_tf = Entry(width = 4)
 aa2_tf.grid(row=2, column=4)
 
-aa3_tf = Entry()
+aa3_tf = Entry(width = 4)
 aa3_tf.grid(row=3, column=4)
 
-aa4_tf = Entry()
+aa4_tf = Entry(width = 4)
 aa4_tf.grid(row=4, column=4)
 
-aa5_tf = Entry()
+aa5_tf = Entry(width = 4)
 aa5_tf.grid(row=5, column=4)
 
-aa6_tf = Entry()
+aa6_tf = Entry(width = 4)
 aa6_tf.grid(row=6, column=4)
 
-aa7_tf = Entry()
+aa7_tf = Entry(width = 4)
 aa7_tf.grid(row=7, column=4)
 
-aa8_tf = Entry()
+aa8_tf = Entry(width = 4)
 aa8_tf.grid(row=8, column=4)
 
-aaa1_tf = Entry()
+#A1
+aaa1_tf = Entry(width = 4)
 aaa1_tf.grid(row=1, column=5)
 
-aaa2_tf = Entry()
+aaa2_tf = Entry(width = 4)
 aaa2_tf.grid(row=2, column=5)
 
-aaa3_tf = Entry()
+aaa3_tf = Entry(width = 4)
 aaa3_tf.grid(row=3, column=5)
 
-aaa4_tf = Entry()
+aaa4_tf = Entry(width = 4)
 aaa4_tf.grid(row=4, column=5)
 
-aaa5_tf = Entry()
+aaa5_tf = Entry(width = 4)
 aaa5_tf.grid(row=5, column=5)
 
-aaa6_tf = Entry()
+aaa6_tf = Entry(width = 4)
 aaa6_tf.grid(row=6, column=5)
 
-aaa7_tf = Entry()
+aaa7_tf = Entry(width = 4)
 aaa7_tf.grid(row=7, column=5)
 
-aaa8_tf = Entry()
+aaa8_tf = Entry(width = 4)
 aaa8_tf.grid(row=8, column=5)
 
-aaaa1_tf = Entry()
+#A2
+aaaa1_tf = Entry(width = 4)
 aaaa1_tf.grid(row=1, column=6)
 
-aaaa2_tf = Entry()
+aaaa2_tf = Entry(width = 4)
 aaaa2_tf.grid(row=2, column=6)
 
-aaaa3_tf = Entry()
+aaaa3_tf = Entry(width = 4)
 aaaa3_tf.grid(row=3, column=6)
 
-aaaa4_tf = Entry()
+aaaa4_tf = Entry(width = 4)
 aaaa4_tf.grid(row=4, column=6)
 
-aaaa5_tf = Entry()
+aaaa5_tf = Entry(width = 4)
 aaaa5_tf.grid(row=5, column=6)
 
-aaaa6_tf = Entry()
+aaaa6_tf = Entry(width = 4)
 aaaa6_tf.grid(row=6, column=6)
 
-aaaa7_tf = Entry()
+aaaa7_tf = Entry(width = 4)
 aaaa7_tf.grid(row=7, column=6)
 
-aaaa8_tf = Entry()
+aaaa8_tf = Entry(width = 4)
 aaaa8_tf.grid(row=8, column=6)
 
-otv1_tf = Entry()
-otv1_tf.grid(row=1, column=7)
-otv1_tf.insert(0, a1)
+average = Label(root, text = '', justify = CENTER)
+average.grid(row=1, column=7)
+average1 = Label(root, text = '', justify = CENTER)
+average1.grid(row=2, column=7)
+average2 = Label(root, text = '', justify = CENTER)
+average2.grid(row=3, column=7)
+average3 = Label(root, text = '', justify = CENTER)
+average3.grid(row=4, column=7)
+average4 = Label(root, text = '', justify = CENTER)
+average4.grid(row=5, column=7)
+average5 = Label(root, text = '', justify = CENTER)
+average5.grid(row=6, column=7)
+average6 = Label(root, text = '', justify = CENTER)
+average6.grid(row=7, column=7)
+average7 = Label(root, text = '', justify = CENTER)
+average7.grid(row=8, column=7)
+
+lrs = Label(root, text = '', justify = CENTER)
+lrs.grid(row=1, column=8)
+
 
 cal_btn = Button(
    text='Посчитать',
@@ -282,7 +217,8 @@ cal_btn = Button(
 cal_btn.grid(row=10, column=2)
 
 
-clear_button = Button(text="Очистить", command=clear)
+
+clear_button = Button(text="Очистить")
 clear_button.grid(row=10, column=1)
 
 
