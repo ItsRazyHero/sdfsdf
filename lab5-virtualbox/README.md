@@ -21,8 +21,8 @@
                           │
                    NAT 192.168.32.2
                           │
-                 NETBSD (шлюз)  wm1: 192.168.32.15*   ← см. примечание про .128
-                          │ wm0: 192.168.40.57
+                 NETBSD (шлюз)  pcn1: 192.168.32.15*   ← см. примечание про .128
+                          │ pcn0: 192.168.40.57
  ┌────────────────────────┴──────────── VMnet1 192.168.40.0/24 ─────┐
  │ LINUX 192.168.40.32 (gw .2)                                       │
  └────────────────────────┬──────────────────────────────────────────┘
@@ -39,17 +39,20 @@
 ## 1. Что нужно скачать
 
 - VirtualBox 7.x (+ Extension Pack не нужен).
-- Образы ОС. Оригинальные Mandrake 2006 / FreeBSD 6 / NetBSD 3.0 не стоит искать — берите современные аналоги, роли те же:
+- Образы ОС — **старые версии**, как в методичке (мало RAM/диска, те же имена интерфейсов). Все 32-битные:
 
-  | ВМ      | ОС в методичке  | Что ставить                                   |
-  |---------|-----------------|-----------------------------------------------|
-  | WIN98   | Windows 98      | Windows 98 SE (iso/дискета загрузки) — как есть |
-  | WIN2000 | Windows 2k/XP   | Windows 2000 или XP                           |
-  | LINUX   | Linux Mandrake  | Debian / Ubuntu Server (нужен Web-сервер: apache2/nginx) |
-  | FREEBSD | FreeBSD         | FreeBSD 13/14 (`disc1.iso`)                   |
-  | NETBSD  | NetBSD 3.0      | NetBSD 10 (`amd64cd.iso`)                     |
+  | ВМ      | Что ставить                                    | Где взять |
+  |---------|------------------------------------------------|-----------|
+  | WIN98   | Windows 98 SE + загрузочная дискета/образ      | свой дистрибутив / archive.org |
+  | WIN2000 | Windows 2000 (можно XP)                        | свой дистрибутив / archive.org |
+  | LINUX   | Mandrake/Mandriva 2006 (как в методичке)       | archive.org, `mandriva 2006 free i586` |
+  | FREEBSD | FreeBSD 6.x, `i386-disc1.iso`                  | ftp-archive.freebsd.org/pub/FreeBSD-Archive/old-releases/i386/ISO-IMAGES/ |
+  | NETBSD  | NetBSD 3.0, `i386cd.iso`                       | archive.netbsd.org |
 
-Если преподаватель требует именно старые версии — схема не меняется, только имена интерфейсов (`lnc0` вместо `em0` и т. п.).
+  Если Mandriva 2006 не находится — подойдёт любой лёгкий Linux на 256 МБ (например Debian netinst без графики); нужен только статический IP и веб-сервер.
+
+**Win10-хозяин:** VirtualBox плохо работает вместе с Hyper-V. Если ВМ тормозят или пишут про «VT-x/Hyper-V», отключите «Платформу виртуальной машины»,
+«Hyper-V» и «Песочницу Windows» в «Включение или отключение компонентов Windows» (и WSL2/Docker Desktop на время лабы) и перезагрузитесь.
 
 ## 2. Создать сети и ВМ
 
@@ -71,13 +74,15 @@ cd lab5-virtualbox
 2. Machine → New. RAM/диск — как в таблице ниже. Settings → Network: для каждой карты Attached to = *Host-only Adapter* и нужный адаптер.
    У NETBSD вторая карта — *NAT* (Advanced → Port Forwarding, см. шаг 5).
 
-| ВМ      | RAM    | Диск (динамический) | Карты |
-|---------|--------|---------------------|-------|
-| WIN98   | 64 МБ  | 0,5 ГБ              | VMnet3 (тип AMD PCnet-FAST III) |
-| WIN2000 | 128 МБ | 2 ГБ                | VMnet2 (AMD PCnet-FAST III) |
-| LINUX   | 1 ГБ   | 10 ГБ               | VMnet1 |
-| FREEBSD | 512 МБ | 5 ГБ                | VMnet1, VMnet2, VMnet3 |
-| NETBSD  | 512 МБ | 3 ГБ                | VMnet1, NAT |
+| ВМ      | RAM    | Диск (динамический) | Карты (все AMD PCnet-FAST III) |
+|---------|--------|---------------------|--------------------------------|
+| WIN98   | 64 МБ  | 0,5 ГБ              | VMnet3 |
+| WIN2000 | 128 МБ | 1 ГБ                | VMnet2 |
+| LINUX   | 256 МБ | 2 ГБ                | VMnet1 |
+| FREEBSD | 64 МБ  | 1 ГБ                | VMnet1, VMnet2, VMnet3 |
+| NETBSD  | 64 МБ  | 0,5 ГБ              | VMnet1, NAT |
+
+Итого одновременно около 640 МБ RAM и ~5 ГБ на диске (диски динамические — занимают только реально использованное).
 
 > **Linux/macOS-хост:** VirtualBox по умолчанию разрешает host-only только в 192.168.56.0/21. Создайте `/etc/vbox/networks.conf` со строкой
 > `* 192.168.0.0/16`, иначе адреса 40/80/120 будут отклонены. На Windows ограничения нет.
@@ -105,19 +110,25 @@ cd lab5-virtualbox
 Свойства подключения → TCP/IP → *Получить IP-адрес автоматически*. Должен получить **192.168.80.128** (проверка: `ipconfig /all`).
 Шлюз по умолчанию задайте вручную: `192.168.80.2` (встроенный DHCP-сервер VirtualBox может выдать другой шлюз — проверьте `route print`).
 
-### LINUX (VMnet1, статика) — Debian/Ubuntu с ifupdown
-`/etc/network/interfaces`:
-```
-auto lo
-iface lo inet loopback
+### LINUX (VMnet1, статика)
+**Mandrake/Mandriva:** Центр управления → Сеть → eth0 (или файлы вручную):
 
-auto eth0
-iface eth0 inet static
-    address 192.168.40.32
-    netmask 255.255.255.0
-    gateway 192.168.40.2
+`/etc/sysconfig/network-scripts/ifcfg-eth0`
 ```
-Если используется netplan — адрес `192.168.40.32/24`, `routes: [{to: default, via: 192.168.40.2}]`. Имя интерфейса смотрите в `ip a` (может быть `enp0s3`).
+DEVICE=eth0
+BOOTPROTO=static
+IPADDR=192.168.40.32
+NETMASK=255.255.255.0
+ONBOOT=yes
+```
+`/etc/sysconfig/network`
+```
+NETWORKING=yes
+GATEWAY=192.168.40.2
+```
+затем `service network restart`.
+
+*Если вместо Mandriva поставили Debian:* в `/etc/network/interfaces` блок `iface eth0 inet static` с теми же address/netmask/gateway.
 
 Ручной вариант из методички (до перезагрузки), если нужно показать:
 ```
@@ -128,60 +139,47 @@ route add default gw 192.168.40.2 eth0
 ```
 
 ### FREEBSD — маршрутизатор (VMnet1/2/3)
-`/etc/rc.conf` (интерфейсы `em0/em1/em2` — порядок карт в VirtualBox: 1→VMnet1, 2→VMnet2, 3→VMnet3):
+`/etc/rc.conf` (интерфейсы `lnc0/lnc1/lnc2`, как в методичке; порядок карт: 1→VMnet1, 2→VMnet2, 3→VMnet3):
 ```
 gateway_enable="YES"
 defaultrouter="192.168.40.57"
-ifconfig_em0="inet 192.168.40.2 netmask 255.255.255.0"
-ifconfig_em1="inet 192.168.80.2 netmask 255.255.255.0"
-ifconfig_em2="inet 192.168.120.2 netmask 255.255.255.0"
+ifconfig_lnc0="inet 192.168.40.2 netmask 255.255.255.0"
+ifconfig_lnc1="inet 192.168.80.2 netmask 255.255.255.0"
+ifconfig_lnc2="inet 192.168.120.2 netmask 255.255.255.0"
 ```
 > В методичке опечатка: маска `255.255.225.0` — правильно **255.255.255.0**.
 
 `reboot`.
 
 ### NETBSD — шлюз (VMnet1 + NAT)
-Интерфейсы: `wm0` — VMnet1, `wm1` — NAT. `/etc/rc.conf`:
+Интерфейсы (карта PCnet): `pcn0` — VMnet1, `pcn1` — NAT (проверьте по `ifconfig -a`). `/etc/rc.conf`:
 ```
-ifconfig_wm0="inet 192.168.40.57 netmask 255.255.255.0"
-dhcpcd=YES
-dhcpcd_flags="-4 wm1"
+ifconfig_pcn0="inet 192.168.40.57 netmask 255.255.255.0"
+dhclient=YES
+dhclient_flags="pcn1"
+ipfilter=YES
+ipnat=YES
 ```
 `/etc/sysctl.conf`:
 ```
 net.inet.ip.forwarding=1
 ```
-Шлюз по умолчанию (192.168.32.2) прилетит по DHCP от встроенного NAT VirtualBox.
+Вторая карта получит адрес 192.168.32.15 и шлюз по умолчанию 192.168.32.2 от DHCP встроенного NAT VirtualBox.
 
 **Чего нет в методичке, но без этого связь не заработает:**
-1. Шлюзу нужны маршруты в «дальние» подсети через маршрутизатор:
+1. Шлюзу нужны маршруты в «дальние» подсети через маршрутизатор (в `/etc/rc.local`, чтобы пережили перезагрузку):
    ```
    route add -net 192.168.80.0/24 192.168.40.2
    route add -net 192.168.120.0/24 192.168.40.2
    ```
-   (на постоянку — через `static_routes` в `rc.conf`, см. `man rc.conf`, или добавьте в `/etc/rc.local`).
 2. Шлюз должен подменять адреса внутренних сетей на свой «внешний» (маскарад), иначе встроенный NAT VirtualBox не будет надёжно пропускать
-   пакеты с чужими адресами (особенно ping). Пример `/etc/npf.conf` (проверьте синтаксис по `man npf.conf` для вашей версии NetBSD):
+   пакеты с чужими адресами (особенно ping). В NetBSD 3.0 для этого есть IPFilter — `/etc/ipnat.conf`:
    ```
-   $ext_if = "wm1"
-   $int_if = "wm0"
-
-   alg "icmp"
-   map $ext_if dynamic 192.168.0.0/16 -> ifaddrs($ext_if)
-
-   group "external" on $ext_if {
-       pass stateful out final all
-       block in final all
-   }
-   group "internal" on $int_if {
-       pass final all
-   }
-   group default {
-       pass final on lo0 all
-       block all
-   }
+   map pcn1 192.168.0.0/16 -> 0/32 proxy port ftp ftp/tcp
+   map pcn1 192.168.0.0/16 -> 0/32 portmap tcp/udp auto
+   map pcn1 192.168.0.0/16 -> 0/32
    ```
-   В `rc.conf`: `npf=YES`, затем `service npf reload`.
+   Применить: `/etc/rc.d/ipnat restart` (синтаксис подробнее — `man ipnat`).
 
 ## 5. Доступ из внешней сети к веб-серверу LINUX (проброс порта 80)
 
@@ -189,8 +187,8 @@ net.inet.ip.forwarding=1
 
 1. **VirtualBox → NETBSD → Settings → Network → Adapter 2 → Advanced → Port Forwarding:**
    Name `web`, Protocol TCP, Host Port `8080` (порт 80 на Linux/macOS требует root), Guest IP `192.168.32.15`, Guest Port `80`.
-2. **На NETBSD** перенаправить 80 на LINUX — в `npf.conf` добавить правило редиректа (синтаксис — `man npf.conf`, раздел NAT/`map … <-`):
-   входящий TCP/80 на `wm1` → `192.168.40.32:80`.
+2. **На NETBSD** перенаправить 80 на LINUX — в `/etc/ipnat.conf` добавить строку
+   `rdr pcn1 0.0.0.0/0 port 80 -> 192.168.40.32 port 80 tcp` и выполнить `/etc/rc.d/ipnat restart`.
 3. Проверка с реальной машины: `http://localhost:8080/` → страница Web-сервера LINUX.
 
 Если проброс не нужен вашему варианту — этот шаг пропускается.

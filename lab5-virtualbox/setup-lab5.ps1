@@ -69,13 +69,14 @@ function New-LabVM {
     Write-Host "ВМ $Name создана"
 }
 
-# Для Win98/Win2000 используется карта AMD PCnet (драйвер есть в самих ОС), для остальных - Intel e1000.
-New-LabVM -Name WIN98   -OsType Win98        -RamMb 64   -DiskMb 512   -NicType Am79C973 -Nics @(@{Mode="hostonly"; Net="VMnet3"})
-New-LabVM -Name WIN2000 -OsType Windows2000  -RamMb 128  -DiskMb 2048  -NicType Am79C973 -Nics @(@{Mode="hostonly"; Net="VMnet2"})
-New-LabVM -Name LINUX   -OsType Debian_64    -RamMb 1024 -DiskMb 10240 -NicType 82540EM  -Nics @(@{Mode="hostonly"; Net="VMnet1"})
-New-LabVM -Name FREEBSD -OsType FreeBSD_64   -RamMb 512  -DiskMb 5120  -NicType 82540EM  -Nics @(
+# Размеры из методички (старые ОС), везде карта AMD PCnet - драйвер есть в самих ОС, имена интерфейсов как в методичке.
+# Linux (Mandrake/Mandriva 2006) взят с запасом по памяти - графический установщик на 64 МБ не стартует.
+New-LabVM -Name WIN98   -OsType Win98        -RamMb 64  -DiskMb 512  -NicType Am79C973 -Nics @(@{Mode="hostonly"; Net="VMnet3"})
+New-LabVM -Name WIN2000 -OsType Windows2000  -RamMb 128 -DiskMb 1024 -NicType Am79C973 -Nics @(@{Mode="hostonly"; Net="VMnet2"})
+New-LabVM -Name LINUX   -OsType Mandriva     -RamMb 256 -DiskMb 2048 -NicType Am79C973 -Nics @(@{Mode="hostonly"; Net="VMnet1"})
+New-LabVM -Name FREEBSD -OsType FreeBSD      -RamMb 64  -DiskMb 1024 -NicType Am79C973 -Nics @(
     @{Mode="hostonly"; Net="VMnet1"}, @{Mode="hostonly"; Net="VMnet2"}, @{Mode="hostonly"; Net="VMnet3"})
-New-LabVM -Name NETBSD  -OsType NetBSD_64    -RamMb 512  -DiskMb 3072  -NicType 82540EM  -Nics @(
+New-LabVM -Name NETBSD  -OsType NetBSD       -RamMb 64  -DiskMb 512  -NicType Am79C973 -Nics @(
     @{Mode="hostonly"; Net="VMnet1"}, @{Mode="nat"; NatNet="192.168.32.0/24"})
 
 Write-Host "`nГотово. Дальше: подключить ISO и поставить ОС (README.md, шаг 3)."
