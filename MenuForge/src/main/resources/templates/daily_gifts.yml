@@ -1,0 +1,64 @@
+# A daily reward: claim once per day, counter shows the time left.
+title: "<dark_gray>Daily Gifts"
+rows: 3
+command: dailygifts
+aliases: [gifts]
+refresh: 20
+bedrock:
+  content: "A gift every day. Come back tomorrow for the next one!"
+items:
+  gift_row:
+    slots: "2-6"
+    material: CHEST_MINECART
+    name: "<aqua>Gift"
+    lore:
+      - "<gray>One of these is yours today."
+    bedrock:
+      hidden: true
+  claim:
+    slot: 13
+    material: CHEST
+    name: "<gold><bold>CLAIM"
+    lore:
+      - "<gray>Open today's gift."
+    glow: true
+    states:
+      - label: waiting
+        requirements:
+          - type: placeholder
+            input: "%cooldown_daily_gift%"
+            operator: "!="
+            output: "ready"
+        material: CLOCK
+        name: "<red>Come back later"
+        lore:
+          - "<gray>Next gift in <white>%cooldown_daily_gift%"
+        glow: false
+    left-click:
+      - type: cooldown
+        key: daily_gift
+        duration: 1d
+        deny:
+          - "[message] <red>Come back tomorrow for the next gift (<white>%cooldown_daily_gift%</white>)."
+          - "[sound] block.note_block.bass"
+      - "[console] give %player_name% diamond 2"
+      - "[message] <green>You opened today's gift!"
+      - "[sound] entity.player.levelup"
+      - "[refresh]"
+    bedrock:
+      text: "Claim today's gift"
+      image: "textures/blocks/chest_front"
+  back:
+    slot: 18
+    material: ARROW
+    name: "<gray>Back"
+    left-click:
+      - "[back]"
+  close:
+    slot: 26
+    material: BARRIER
+    name: "<red>Close"
+    left-click:
+      - "[close]"
+    bedrock:
+      hidden: true

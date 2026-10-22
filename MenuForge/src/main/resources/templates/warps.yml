@@ -1,0 +1,56 @@
+# Warps with a VIP-only entry and a states example.
+title: "<dark_gray>Warps"
+rows: 3
+command: warps
+items:
+  spawn:
+    slot: 10
+    material: GRASS_BLOCK
+    name: "<green>Spawn"
+    lore:
+      - "<gray>Back to the beginning."
+    left-click:
+      - "[close]"
+      - "[player] /spawn"
+  mine:
+    slot: 12
+    material: IRON_PICKAXE
+    name: "<gray>Mine"
+    left-click:
+      - "[close]"
+      - "[player] /warp mine"
+  arena:
+    slot: 14
+    material: DIAMOND_SWORD
+    name: "<red>PvP Arena"
+    lore:
+      - "<gray>Fight other players."
+    left-click:
+      - type: cooldown
+        key: warp_arena
+        duration: 30s
+        deny:
+          - "[actionbar] <red>Wait %cooldown_warp_arena% before warping again."
+      - "[close]"
+      - "[player] /warp arena"
+  vip:
+    slot: 16
+    material: NETHER_STAR
+    name: "<light_purple>VIP Lounge"
+    lore:
+      - "<gray>Needs the <white>warps.vip</white> permission."
+    glow: true
+    left-click:
+      - type: permission
+        value: warps.vip
+        deny:
+          - "[message] <red>VIP only. Buy a rank at the store!"
+          - "[sound] entity.villager.no"
+      - "[close]"
+      - "[player] /warp vip"
+  back:
+    slot: 18
+    material: ARROW
+    name: "<gray>Back"
+    left-click:
+      - "[back]"

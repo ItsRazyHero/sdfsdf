@@ -1,0 +1,40 @@
+# MenuForge configuration
+
+# Reload menus / rebuild the resource pack automatically when files change on disk.
+auto-reload: true
+
+# Built-in web server: hosts the no-code editor, the deploy API and the resource pack.
+web:
+  enabled: true
+  port: 8085
+  # Leave empty to auto-generate a token on first start. The editor asks for it.
+  token: ""
+  # Public URL players and the editor use to reach this server, e.g. http://1.2.3.4:8085
+  # Leave empty to use the server's IP from server.properties.
+  public-address: ""
+
+resource-pack:
+  # Send the generated pack (textures/*.png -> fonts) to players on join.
+  send-on-join: true
+  required: false
+  prompt: "<yellow>MenuForge textures<newline><gray>Needed to see custom menu skins"
+
+shop:
+  currency: "$"
+  buy-lore: "<gray>Buy: <green>{currency}{price}"
+  sell-lore: "<gray>Sell: <gold>{currency}{price}"
+  hint-lore: "<dark_gray>Left click to buy, right click to sell"
+  bought: "<green>You bought <white>{amount}x {item}</white> for <gold>{currency}{price}</gold>."
+  sold: "<green>You sold <white>{amount}x {item}</white> for <gold>{currency}{price}</gold>."
+  not-enough-money: "<red>You need {currency}{price} for that."
+  not-enough-items: "<red>You don't have {amount}x {item}."
+
+messages:
+  prefix: "<gradient:#ff8c1a:#ffb347>MenuForge</gradient> <dark_gray>» <gray>"
+  no-permission: "<red>You don't have permission to do that."
+  menu-not-found: "<red>Menu <white>{menu}</white> not found."
+  player-only: "<red>Only players can do that."
+  denied-world: "<red>This menu can't be opened in this world."
+  reloaded: "<green>Reloaded {menus} menu(s)."
+  cooldown-format: "{d}d {h}h {m}m {s}s"
+  cooldown-ready: "ready"

@@ -1,0 +1,44 @@
+# Toggle-style buttons using left/right click and a placeholder-driven state.
+title: "<dark_gray>Settings"
+rows: 3
+command: settings
+items:
+  fly:
+    slot: 11
+    material: FEATHER
+    name: "<aqua>Flight"
+    lore:
+      - "<gray>Left: enable  <dark_gray>|  <gray>Right: disable"
+    left-click:
+      - { type: permission, value: settings.fly, deny: ["[message] <red>No permission."] }
+      - "[player] /fly on"
+      - "[actionbar] <green>Flight enabled"
+    right-click:
+      - "[player] /fly off"
+      - "[actionbar] <red>Flight disabled"
+    bedrock:
+      text: "Flight on"
+      right-text: "Flight off"
+  gamemode:
+    slot: 13
+    material: COMPASS
+    name: "<yellow>Gamemode: <white>%player_gamemode%"
+    left-click:
+      - { type: permission, value: settings.gamemode, deny: ["[message] <red>No permission."] }
+      - "[player] /gamemode creative"
+      - "[refresh]"
+    right-click:
+      - "[player] /gamemode survival"
+      - "[refresh]"
+  chance:
+    slot: 15
+    material: RABBIT_FOOT
+    name: "<light_purple>Lucky draw"
+    lore: ["<gray>25% chance of a prize"]
+    left-click:
+      - type: chance
+        percent: 25
+        deny:
+          - "[message] <gray>No luck this time."
+      - "[console] give %player_name% emerald"
+      - "[message] <green>Winner!"

@@ -1,0 +1,51 @@
+# Quest board driven by PlaceholderAPI values (adjust placeholders to your quest plugin).
+title: "<dark_gray>Quests"
+rows: 4
+command: quests
+refresh: 40
+items:
+  frame:
+    slots: ["0-8", "27-35"]
+    material: BLACK_STAINED_GLASS_PANE
+    name: " "
+    bedrock: { hidden: true }
+  mining:
+    slot: 11
+    material: STONE_PICKAXE
+    name: "<yellow>Mine 100 stone"
+    lore:
+      - "<gray>Progress: <white>%player_statistic_mine_block:stone%<gray>/100"
+    states:
+      - label: done
+        requirements:
+          - { type: placeholder, input: "%player_statistic_mine_block:stone%", operator: ">=", output: "100" }
+        material: LIME_DYE
+        name: "<green>Mine 100 stone <gray>- done"
+        glow: true
+    left-click:
+      - { type: placeholder, input: "%player_statistic_mine_block:stone%", operator: ">=", output: "100",
+          deny: ["[message] <red>Not finished yet."] }
+      - { type: cooldown, key: quest_mining, duration: 7d, deny: ["[message] <red>Already claimed."] }
+      - "[console] give %player_name% emerald 5"
+      - "[title] <green>Quest complete!;<gray>Mine 100 stone"
+  walking:
+    slot: 13
+    material: LEATHER_BOOTS
+    name: "<yellow>Walk 10 km"
+    lore:
+      - "<gray>Progress: <white>%player_statistic_walk_one_cm%<gray> cm"
+    left-click:
+      - "[message] <gray>Keep walking!"
+  kills:
+    slot: 15
+    material: ZOMBIE_HEAD
+    name: "<yellow>Kill 50 zombies"
+    lore:
+      - "<gray>Progress: <white>%player_statistic_kill_entity:zombie%<gray>/50"
+    left-click:
+      - "[message] <gray>Zombies are waiting for you."
+  back:
+    slot: 27
+    material: ARROW
+    name: "<gray>Back"
+    left-click: ["[back]"]
