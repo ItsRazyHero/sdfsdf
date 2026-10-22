@@ -1,0 +1,34 @@
+title: "<dark_gray>%player_name%'s profile"
+rows: 3
+command: profile
+refresh: 20
+items:
+  head:
+    slot: 4
+    material: PLAYER_HEAD
+    head: "%player_name%"
+    name: "<yellow>%player_name%"
+    lore:
+      - "<gray>World: <white>%player_world%"
+      - "<gray>Position: <white>%player_x% %player_y% %player_z%"
+      - "<gray>Ping: <white>%player_ping%ms"
+  health:
+    slot: 11
+    material: GOLDEN_APPLE
+    name: "<red>Health: <white>%player_health%"
+    lore: ["<gray>Food: <white>%player_food%"]
+  level:
+    slot: 13
+    material: EXPERIENCE_BOTTLE
+    name: "<green>Level %player_level%"
+    amount: 1
+  money:
+    slot: 15
+    material: GOLD_INGOT
+    name: "<gold>Balance: <white>%money%"
+    lore: ["<gray>Needs Vault."]
+  back:
+    slot: 18
+    material: ARROW
+    name: "<gray>Back"
+    left-click: ["[back]"]

@@ -1,0 +1,54 @@
+# Main hub menu. Open with /menu
+title: "<dark_gray>Main Menu"
+rows: 3
+command: menu
+aliases: [hub]
+refresh: 0
+on-open:
+  - "[sound] ui.button.click"
+items:
+  frame:
+    slots: ["0-8", "18-26", 9, 17]
+    material: GRAY_STAINED_GLASS_PANE
+    name: " "
+    bedrock:
+      hidden: true
+  profile:
+    slot: 11
+    material: PLAYER_HEAD
+    head: "%player_name%"
+    name: "<yellow>Your profile"
+    lore:
+      - "<gray>Level: <white>%player_level%"
+      - "<gray>Health: <white>%player_health%"
+      - ""
+      - "<dark_gray>Click to open"
+    left-click:
+      - "[open] profile"
+  shop:
+    slot: 13
+    material: EMERALD
+    name: "<green>Shop"
+    lore:
+      - "<gray>Buy and sell items."
+    glow: true
+    left-click:
+      - "[open] shop"
+    bedrock:
+      image: "textures/items/emerald"
+  gifts:
+    slot: 15
+    material: CHEST
+    name: "<gold>Daily gifts"
+    lore:
+      - "<gray>Next gift: <white>%cooldown_daily_gift%"
+    left-click:
+      - "[open] daily_gifts"
+  close:
+    slot: 22
+    material: BARRIER
+    name: "<red>Close"
+    left-click:
+      - "[close]"
+    bedrock:
+      hidden: true

@@ -1,0 +1,58 @@
+title: "<dark_gray>Kits"
+rows: 3
+command: kits
+items:
+  starter:
+    slot: 11
+    material: LEATHER_CHESTPLATE
+    name: "<green>Starter kit"
+    lore:
+      - "<gray>Basic tools and food."
+      - "<gray>Cooldown: <white>%cooldown_kit_starter%"
+    left-click:
+      - type: cooldown
+        key: kit_starter
+        duration: 12h
+        deny:
+          - "[message] <red>Kit available again in %cooldown_kit_starter%."
+      - "[console] give %player_name% stone_pickaxe"
+      - "[console] give %player_name% stone_sword"
+      - "[console] give %player_name% bread 16"
+      - "[message] <green>Starter kit received."
+      - "[refresh]"
+  warrior:
+    slot: 13
+    material: IRON_CHESTPLATE
+    name: "<yellow>Warrior kit"
+    lore:
+      - "<gray>Needs permission <white>kits.warrior"
+    left-click:
+      - type: permission
+        value: kits.warrior
+        deny:
+          - "[message] <red>You don't own this kit."
+      - type: cooldown
+        key: kit_warrior
+        duration: 1d
+        deny:
+          - "[message] <red>Available again in %cooldown_kit_warrior%."
+      - "[console] give %player_name% iron_sword"
+      - "[console] give %player_name% iron_chestplate"
+      - "[message] <green>Warrior kit received."
+  vip:
+    slot: 15
+    material: DIAMOND_CHESTPLATE
+    name: "<light_purple>VIP kit"
+    glow: true
+    left-click:
+      - type: permission
+        value: kits.vip
+        deny:
+          - "[message] <red>VIP only."
+      - type: cooldown
+        key: kit_vip
+        duration: 1d
+        deny:
+          - "[message] <red>Available again in %cooldown_kit_vip%."
+      - "[console] give %player_name% diamond_sword"
+      - "[message] <green>VIP kit received."

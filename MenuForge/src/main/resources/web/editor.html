@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MenuForge Editor</title>
+<style>
+:root{--bg:#121318;--panel:#1b1d24;--panel2:#22252e;--line:#2e3240;--text:#e6e8ef;--muted:#8d93a5;--accent:#ff8c1a;--accent2:#ffb347;--blue:#4ea1ff;--green:#4cd964;--red:#ff5c5c;--cond:#e0a63b;--act:#4ea1ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:13px/1.45 Inter,system-ui,Segoe UI,Roboto,sans-serif;height:100vh;display:grid;grid-template-rows:48px 1fr;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:5px 10px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#1a1200;font-weight:600}
+button.small{padding:2px 7px;font-size:12px}
+button.danger{color:var(--red)}
+input,select,textarea{background:#0f1015;border:1px solid var(--line);border-radius:6px;padding:5px 7px;width:100%}
+input[type=checkbox]{width:auto}
+textarea{resize:vertical;min-height:52px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px}
+label{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin:8px 0 3px}
+header{display:flex;align-items:center;gap:10px;padding:0 14px;background:var(--panel);border-bottom:1px solid var(--line)}
+header .logo{font-weight:800;font-size:16px;color:var(--accent)}
+header .logo span{color:var(--text);font-weight:500;font-size:12px;margin-left:8px;color:var(--muted)}
+header .tabs{display:flex;gap:4px;margin-left:16px}
+header .tabs button{background:transparent;border-color:transparent}
+header .tabs button.on{background:var(--panel2);border-color:var(--line)}
+header .spacer{flex:1}
+#status{color:var(--muted);font-size:12px}
+#status.ok{color:var(--green)}#status.bad{color:var(--red)}
+main{display:grid;grid-template-columns:230px 1fr 320px;grid-template-rows:1fr 300px;min-height:0}
+#side{grid-row:1/3;background:var(--panel);border-right:1px solid var(--line);overflow:auto;padding:10px}
+#center{overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:20px;background:
+ radial-gradient(circle at 1px 1px,#1f2129 1px,transparent 1px) 0 0/24px 24px}
+#inspector{grid-row:1/3;background:var(--panel);border-left:1px solid var(--line);overflow:auto;padding:12px}
+#flow{grid-column:2;background:var(--panel);border-top:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+#flow .tabs{display:flex;gap:2px;padding:6px 8px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+#flow .tabs button{border-radius:6px 6px 0 0;border-bottom:none;background:transparent;border-color:transparent;color:var(--muted)}
+#flow .tabs button.on{background:var(--panel2);border-color:var(--line);color:var(--text)}
+#flowBody{overflow:auto;padding:10px;flex:1}
+.list{list-style:none;margin:0;padding:0}
+.list li{padding:6px 8px;border-radius:6px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.list li:hover{background:var(--panel2)}
+.list li.on{background:var(--panel2);outline:1px solid var(--accent)}
+.list li .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex:none}
+.muted{color:var(--muted)}
+.row{display:flex;gap:6px;align-items:center}
+.row > *{flex:1}
+.row > button{flex:none}
+h3{margin:4px 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+hr{border:0;border-top:1px solid var(--line);margin:12px 0}
+canvas#gui{image-rendering:pixelated;background:#0b0c10;border:1px solid var(--line);border-radius:4px;cursor:pointer}
+.block{border:1px solid var(--line);border-left:3px solid var(--act);border-radius:7px;background:var(--panel2);padding:8px 10px;margin-bottom:8px}
+.block.cond{border-left-color:var(--cond)}
+.block .head{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.block .head b{flex:1;font-size:12px}
+.block .fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px}
+.block .fields label{margin:0 0 2px}
+.deny{margin:8px 0 0 10px;padding:8px;border:1px dashed #6b5a2a;border-radius:6px;background:#1a1812}
+.deny .tag{font-size:10px;font-weight:700;color:var(--cond);letter-spacing:.08em;margin-bottom:6px}
+.addrow{display:flex;gap:6px;align-items:center;margin-top:6px}
+.addrow select{flex:1}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#2b2f3a;border:1px solid var(--line);padding:10px 16px;border-radius:8px;z-index:50;opacity:0;transition:opacity .2s}
+.toast.show{opacity:1}
+.toast.err{border-color:var(--red)}
+dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:18px;width:420px}
+dialog::backdrop{background:#0008}
+code,kbd{background:#0f1015;border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:12px}
+/* texture studio */
+#studio{display:none;grid-column:2/4;grid-row:1/3;grid-template-columns:1fr 260px;min-height:0}
+#studio.on{display:grid}
+#studioCanvasWrap{overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:16px;background:#0b0c10}
+canvas#tex{image-rendering:pixelated;cursor:crosshair;background:
+ repeating-conic-gradient(#2a2d36 0 25%,#1d1f27 0 50%) 0 0/16px 16px}
+#tools{background:var(--panel);border-left:1px solid var(--line);padding:12px;overflow:auto}
+.toolgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.toolgrid button.on{background:var(--accent);color:#1a1200;border-color:var(--accent)}
+.palette{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin-top:6px}
+.palette div{aspect-ratio:1;border-radius:4px;border:1px solid #0006;cursor:pointer}
+.palette div.on{outline:2px solid var(--accent)}
+.thumb{width:48px;height:48px;image-rendering:pixelated;background:#0b0c10;border-radius:4px;border:1px solid var(--line)}
+.chip{display:inline-block;background:#0f1015;border:1px solid var(--line);border-radius:999px;padding:1px 8px;font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">MenuForge<span>no-code menu builder</span></div>
+  <div class="tabs">
+    <button id="tabMenus" class="on" onclick="showTab('menus')">Menus</button>
+    <button id="tabTextures" onclick="showTab('textures')">Textures</button>
+  </div>
+  <div class="spacer"></div>
+  <span id="status">not connected</span>
+  <button onclick="openConnect()">Connect</button>
+  <button onclick="exportProject()">Export</button>
+  <button onclick="importProject()">Import</button>
+  <button class="primary" onclick="deploy()">Deploy</button>
+</header>
+<main>
+  <aside id="side">
+    <h3>Menus</h3>
+    <ul id="menuList" class="list"></ul>
+    <div class="row" style="margin-top:8px">
+      <button class="small" onclick="newMenu()">+ New</button>
+      <select id="tplSelect" class="small"><option value="">Template…</option></select>
+    </div>
+    <hr>
+    <h3>Test in game</h3>
+    <div class="row"><select id="playerSelect"></select><button class="small" onclick="openInGame()">Open</button></div>
+    <hr>
+    <h3>Textures</h3>
+    <ul id="texList" class="list"></ul>
+    <div class="muted" style="margin-top:8px;font-size:11px">Textures become menu skins. Assign one in the menu inspector; the resource pack is rebuilt on deploy.</div>
+  </aside>
+
+  <section id="center">
+    <div>
+      <div class="row" style="margin-bottom:8px">
+        <span id="menuTitleLabel" class="muted"></span>
+        <span class="chip">zoom <input id="zoom" type="range" min="2" max="5" value="3" style="width:80px;vertical-align:middle" oninput="drawMenu()"></span>
+        <span class="muted" style="font-size:11px;flex:none">click = select · drag = move · double-click = new item · Del = delete</span>
+      </div>
+      <canvas id="gui"></canvas>
+    </div>
+  </section>
+
+  <section id="flow">
+    <div class="tabs" id="flowTabs"></div>
+    <div id="flowBody"></div>
+  </section>
+
+  <aside id="inspector"></aside>
+
+  <section id="studio">
+    <div id="studioCanvasWrap"><canvas id="tex"></canvas></div>
+    <div id="tools"></div>
+  </section>
+</main>
+
+<div id="toast" class="toast"></div>
+<dialog id="connectDlg">
+  <h3>Connect to your server</h3>
+  <label>Server URL</label><input id="srvUrl" placeholder="http://1.2.3.4:8085">
+  <label>Token (from /mf editor or config.yml)</label><input id="srvToken" placeholder="token">
+  <div class="row" style="margin-top:14px;justify-content:flex-end">
+    <button onclick="connectDlg.close()">Cancel</button>
+    <button class="primary" onclick="saveConnect()">Connect</button>
+  </div>
+</dialog>
+<datalist id="materialsDl"></datalist>
+<datalist id="soundsDl"></datalist>
+<datalist id="menusDl"></datalist>
+
+<script>
+/* =============================== state =============================== */
+const S = {
+  menus:{}, textures:{}, materials:[], sounds:[], templates:[], server:null,
+  current:null, sel:null, flowTab:'left-click', dirty:new Set(), dirtyTex:new Set(),
+  deletedMenus:new Set(), deletedTextures:new Set(), tab:'menus'
+};
+const CLICK_TABS = [['left-click','Left click'],['right-click','Right click'],['middle-click','Middle'],['shift-left','Shift-L'],['shift-right','Shift-R'],['click','Any click'],['states','States'],['view-requirements','Visible if']];
+const MENU_TABS = [['on-open','On open'],['on-close','On close'],['open-requirements','Open requirements']];
+
+/* Block catalogue: mirrors FlowParser in the plugin. [key,label,type,default|options] */
+const BLOCKS = {
+  cooldown:{label:'Cooldown',cond:true,fields:[['key','Key','text','daily_gift'],['duration','Duration (1d 12h 30m 20s)','text','1d']]},
+  permission:{label:'Permission',cond:true,fields:[['value','Permission node','text','']]},
+  money:{label:'Has money',cond:true,fields:[['amount','Amount','text','100'],['take','Take the money','bool',true]]},
+  'has-item':{label:'Has item',cond:true,fields:[['material','Material','material','DIAMOND'],['amount','Amount','number',1],['take','Take the items','bool',false]]},
+  placeholder:{label:'Compare placeholder',cond:true,fields:[['input','Input','text','%player_level%'],['operator','Operator','select',['==','!=','>','>=','<','<=','contains','starts','regex']],['output','Output','text','10']]},
+  chance:{label:'Chance',cond:true,fields:[['percent','Percent','number',50]]},
+  world:{label:'In world',cond:true,fields:[['worlds','Worlds (comma separated)','list','world']]},
+  'is-bedrock':{label:'Is Bedrock player',cond:true,fields:[]},
+  message:{label:'Message',fields:[['text','Text','text','<green>Hello %player_name%']]},
+  broadcast:{label:'Broadcast',fields:[['text','Text','text','']]},
+  actionbar:{label:'Action bar',fields:[['text','Text','text','']]},
+  title:{label:'Title',fields:[['title','Title','text',''],['subtitle','Subtitle','text',''],['fade-in','Fade in (ticks)','number',10],['stay','Stay','number',60],['fade-out','Fade out','number',10]]},
+  sound:{label:'Sound',fields:[['sound','Sound','sound','entity.player.levelup'],['volume','Volume','number',1],['pitch','Pitch','number',1]]},
+  console:{label:'Console command',fields:[['command','Command','text','give %player_name% diamond']]},
+  player:{label:'Player command',fields:[['command','Command','text','/spawn']]},
+  open:{label:'Open menu',fields:[['menu','Menu','menu',''],['args','Arguments','text','']]},
+  close:{label:'Close menu',fields:[]},
+  back:{label:'Back (previous menu)',fields:[]},
+  refresh:{label:'Refresh menu',fields:[]},
+  delay:{label:'Delay',fields:[['ticks','Ticks (20 = 1s)','number',20]]},
+  'give-money':{label:'Give money',fields:[['amount','Amount','text','100']]},
+  'give-item':{label:'Give item',fields:[['material','Material','material','DIAMOND'],['amount','Amount','number',1],['name','Display name','text','']]},
+  'reset-cooldown':{label:'Reset cooldown',fields:[['key','Key','text','']]},
+  teleport:{label:'Teleport',fields:[['world','World (empty = current)','text',''],['x','X','number',0],['y','Y','number',64],['z','Z','number',0]]},
+  'set-var':{label:'Set variable (%var_name%)',fields:[['name','Name','text','x'],['value','Value','text','']]},
+};
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(msg, err){ const t=$('#toast'); t.textContent=msg; t.className='toast show'+(err?' err':''); clearTimeout(t._t); t._t=setTimeout(()=>t.className='toast',2600); }
+
+/* =============================== server =============================== */
+const conn = { url: localStorage.mfUrl || location.origin, token: localStorage.mfToken || '' };
+function openConnect(){ $('#srvUrl').value=conn.url; $('#srvToken').value=conn.token; connectDlg.showModal(); }
+function saveConnect(){ conn.url=$('#srvUrl').value.replace(/\/+$/,''); conn.token=$('#srvToken').value.trim(); localStorage.mfUrl=conn.url; localStorage.mfToken=conn.token; connectDlg.close(); loadState(); }
+async function api(path, opts={}){
+  const r = await fetch(conn.url+'/api/'+path, {...opts, headers:{'Authorization':'Bearer '+conn.token, 'Content-Type':'application/json', ...(opts.headers||{})}});
+  if (r.status===401) throw new Error('Wrong token');
+  if (!r.ok) throw new Error('HTTP '+r.status);
+  return r;
+}
+async function loadState(){
+  const st=$('#status'); st.textContent='connecting…'; st.className='';
+  try{
+    const d = await (await api('state')).json();
+    S.materials=d.materials; S.sounds=d.sounds; S.templates=d.templates; S.server=d.server;
+    if (!Object.keys(S.menus).length || confirm('Replace local draft with the menus from the server?')) {
+      S.menus = d.menus; S.dirty.clear(); S.deletedMenus.clear();
+      for (const id in S.menus) normalizeMenu(id, S.menus[id]);
+    }
+    S.textures = {};
+    for (const t of d.textures) {
+      const blob = await (await api('texture/'+t.name)).blob();
+      const dataURL = await new Promise(res=>{const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.readAsDataURL(blob);});
+      S.textures[t.name] = {dataURL, img:await loadImage(dataURL), title:t.title, titleMini:t.titleMini};
+    }
+    S.dirtyTex.clear(); S.deletedTextures.clear();
+    $('#materialsDl').innerHTML=S.materials.map(m=>`<option value="${m}">`).join('');
+    $('#soundsDl').innerHTML=S.sounds.map(m=>`<option value="${m}">`).join('');
+    $('#tplSelect').innerHTML='<option value="">Template…</option>'+S.templates.map(t=>`<option value="${t}">${t.replace(/_/g,' ')}</option>`).join('');
+    $('#playerSelect').innerHTML=(d.server.players||[]).map(p=>`<option>${esc(p)}</option>`).join('')||'<option value="">no players online</option>';
+    st.textContent=`connected · MC ${d.server.version} · ${d.server.bedrock?'Bedrock ✓':'no Bedrock api'} · ${d.server.vault?'Vault ✓':'no Vault'}`; st.className='ok';
+    if (!S.current) S.current=Object.keys(S.menus)[0]||null;
+    renderAll();
+  }catch(e){ st.textContent='offline: '+e.message; st.className='bad'; if(!conn.token) openConnect(); renderAll(); }
+}
+function loadImage(src){ return new Promise(res=>{const i=new Image(); i.onload=()=>res(i); i.onerror=()=>res(null); i.src=src;}); }
+
+/* =============================== model =============================== */
+function parseSlots(v, rows){
+  const out=[]; const add=s=>{ s=String(s).trim(); if(!s) return; if(s.includes('-')){const [a,b]=s.split('-').map(Number); for(let i=Math.min(a,b);i<=Math.max(a,b);i++) out.push(i);} else out.push(Number(s)); };
+  (Array.isArray(v)?v:[v]).forEach(x=>String(x).split(',').forEach(add));
+  return [...new Set(out)].filter(n=>Number.isInteger(n)&&n>=0&&n<rows*9);
+}
+function normalizeMenu(id, m){
+  m.rows = Math.max(1,Math.min(6, m.rows || Math.floor((m.size||27)/9)));
+  m.items = m.items || {};
+  for (const k in m.items){ const it=m.items[k]; const raw=[]; if(it.slots!=null) raw.push(...(Array.isArray(it.slots)?it.slots:[it.slots])); if(it.slot!=null) raw.push(it.slot); it.slots=parseSlots(raw,m.rows); delete it.slot; }
+  if (m.command==null) m.command=id;
+  return m;
+}
+function newMenu(fromTemplate){
+  const id = prompt('Menu id (letters, digits, _ -):', fromTemplate||'new_menu'); if(!id) return;
+  const clean=id.toLowerCase().replace(/[^a-z0-9_-]/g,'_'); if(S.menus[clean]&&!confirm('Overwrite existing '+clean+'?')) return;
+  const base = fromTemplate ? JSON.parse(JSON.stringify(fromTemplate)) : {title:'<dark_gray>'+clean, rows:3, command:clean, items:{}};
+  if (typeof base==='object' && base.title===undefined) base.title='<dark_gray>'+clean;
+  S.menus[clean]=normalizeMenu(clean, base); S.dirty.add(clean); S.current=clean; S.sel=null; renderAll();
+}
+$('#tplSelect').onchange = async e=>{ const t=e.target.value; e.target.value=''; if(!t) return; try{ const m=await (await api('template/'+t)).json(); newMenu(m); }catch(err){ toast('Template failed: '+err.message,true);} };
+function cur(){ return S.current ? S.menus[S.current] : null; }
+function touch(){ if(S.current) S.dirty.add(S.current); }
+function itemAt(m, slot){ let best=null; for(const k in m.items){ const it=m.items[k]; if(it.slots.includes(slot) && (!best||(it.priority||0)>(m.items[best].priority||0))) best=k; } return best; }
+function uniqueKey(m, base){ let k=base,i=2; while(m.items[k]) k=base+'_'+(i++); return k; }
+
+/* =============================== rendering =============================== */
+function renderAll(){ renderMenuList(); renderTexList(); drawMenu(); renderInspector(); renderFlowTabs(); renderFlow(); }
+function renderMenuList(){
+  $('#menuList').innerHTML = Object.keys(S.menus).sort().map(id=>`<li class="${id===S.current?'on':''}" onclick="selectMenu('${id}')"><span>${esc(id)} <span class="muted">/${esc(S.menus[id].command||'')}</span></span>${S.dirty.has(id)?'<span class="dot" title="unsaved"></span>':''}</li>`).join('') || '<li class="muted">no menus yet</li>';
+}
+function selectMenu(id){ S.current=id; S.sel=null; if(S.flowTab==='states'||!CLICK_TABS.concat(MENU_TABS).some(t=>t[0]===S.flowTab)) S.flowTab='left-click'; renderAll(); }
+function renderTexList(){
+  $('#texList').innerHTML = Object.keys(S.textures).sort().map(n=>`<li onclick="openTexture('${n}')"><span class="row" style="gap:8px"><img class="thumb" style="width:32px;height:32px" src="${S.textures[n].dataURL}"> ${esc(n)}</span>${S.dirtyTex.has(n)?'<span class="dot"></span>':''}</li>`).join('') || '<li class="muted">none</li>';
+}
+
+/* ---- chest canvas ---- */
+const SLOT_X=8, SLOT_Y=18, SLOT=18, GUI_W=176;
+const guiH = rows => 114 + 18*rows;
+function matColor(mat){ let h=0; for(const c of mat) h=(h*31+c.charCodeAt(0))>>>0; return `hsl(${h%360} 55% 45%)`; }
+function matAbbr(mat){ const p=mat.split('_'); return (p.length>1 ? p[0][0]+p[1][0] : mat.slice(0,2)).toUpperCase(); }
+function drawFrame(ctx, rows, x0=0, y0=0){ // procedural vanilla-like chest frame
+  const H=guiH(rows);
+  ctx.fillStyle='#c6c6c6'; ctx.fillRect(x0,y0,GUI_W,H);
+  ctx.fillStyle='#ffffff'; ctx.fillRect(x0,y0,GUI_W,2); ctx.fillRect(x0,y0,2,H);
+  ctx.fillStyle='#555555'; ctx.fillRect(x0,y0+H-2,GUI_W,2); ctx.fillRect(x0+GUI_W-2,y0,2,H);
+  const slot=(x,y)=>{ ctx.fillStyle='#373737'; ctx.fillRect(x-1,y-1,SLOT,SLOT); ctx.fillStyle='#ffffff'; ctx.fillRect(x,y,SLOT,SLOT); ctx.fillStyle='#8b8b8b'; ctx.fillRect(x,y,SLOT-1,SLOT-1); };
+  for(let r=0;r<rows;r++) for(let c=0;c<9;c++) slot(x0+SLOT_X+c*SLOT, y0+SLOT_Y+r*SLOT);
+  const py=y0+SLOT_Y+rows*SLOT+14;
+  for(let r=0;r<3;r++) for(let c=0;c<9;c++) slot(x0+SLOT_X+c*SLOT, py+r*SLOT);
+  for(let c=0;c<9;c++) slot(x0+SLOT_X+c*SLOT, py+3*SLOT+4);
+  ctx.fillStyle='#404040'; ctx.font='8px monospace'; ctx.fillText('Inventory', x0+8, py-4);
+}
+function drawMenu(){
+  const m=cur(), cv=$('#gui'), z=+$('#zoom').value; const rows=m?m.rows:3;
+  cv.width=GUI_W*z; cv.height=guiH(rows)*z; const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false; ctx.setTransform(z,0,0,z,0,0);
+  ctx.clearRect(0,0,GUI_W,guiH(rows));
+  $('#menuTitleLabel').textContent = m ? `${S.current} · ${m.rows} rows · ${Object.keys(m.items).length} items` : 'no menu selected';
+  if(!m) return;
+  const tex = m.texture && S.textures[m.texture]?.img;
+  if (tex) ctx.drawImage(tex,0,0); else drawFrame(ctx, rows);
+  if (!tex){ ctx.fillStyle='#404040'; ctx.font='8px monospace'; ctx.fillText(stripTags(m.title||'').slice(0,28), 8, 13); }
+  for(let s=0;s<rows*9;s++){
+    const k=itemAt(m,s); if(!k) continue; const it=m.items[k];
+    const x=SLOT_X+(s%9)*SLOT, y=SLOT_Y+Math.floor(s/9)*SLOT;
+    ctx.fillStyle=matColor(it.material||'STONE'); ctx.fillRect(x+2,y+2,14,14);
+    ctx.fillStyle='#fff'; ctx.font='bold 7px monospace'; ctx.fillText(matAbbr(it.material||'ST'), x+3, y+10);
+    if ((it.amount||1)>1){ ctx.fillStyle='#000'; ctx.fillText(it.amount, x+9, y+17); ctx.fillStyle='#fff'; ctx.fillText(it.amount, x+8, y+16); }
+    if (it.glow){ ctx.strokeStyle='#c8a0ff'; ctx.lineWidth=1; ctx.strokeRect(x+1.5,y+1.5,15,15); }
+  }
+  if (S.sel && m.items[S.sel]) for(const s of m.items[S.sel].slots){ const x=SLOT_X+(s%9)*SLOT, y=SLOT_Y+Math.floor(s/9)*SLOT; ctx.strokeStyle='#ff8c1a'; ctx.lineWidth=1.5; ctx.strokeRect(x-0.5,y-0.5,SLOT,SLOT); }
+}
+function stripTags(s){ return String(s).replace(/<[^>]*>/g,'').replace(/[&§][0-9a-fk-or]/gi,''); }
+function slotFromEvent(e){ const m=cur(); if(!m) return -1; const r=$('#gui').getBoundingClientRect(); const z=+$('#zoom').value; const x=(e.clientX-r.left)/z-SLOT_X, y=(e.clientY-r.top)/z-SLOT_Y; if(x<0||y<0) return -1; const c=Math.floor(x/SLOT), row=Math.floor(y/SLOT); if(c>8||row>=m.rows||x%SLOT>=16||y%SLOT>=16) return -1; return row*9+c; }
+let drag=null;
+$('#gui').addEventListener('mousedown', e=>{ const s=slotFromEvent(e); if(s<0) return; const k=itemAt(cur(),s); S.sel=k; drag=k?{key:k,from:s}:null; drawMenu(); renderInspector(); renderFlowTabs(); renderFlow(); });
+$('#gui').addEventListener('mouseup', e=>{ if(!drag) return; const to=slotFromEvent(e); const m=cur(); if(to>=0&&to!==drag.from&&!itemAt(m,to)){ const it=m.items[drag.key]; it.slots=it.slots.map(x=>x===drag.from?to:x); touch(); renderAll(); } drag=null; });
+$('#gui').addEventListener('dblclick', e=>{ const s=slotFromEvent(e); const m=cur(); if(s<0||!m||itemAt(m,s)) return; addItemAt(s); });
+document.addEventListener('keydown', e=>{ if(e.key==='Delete'&&S.sel&&S.tab==='menus'&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) deleteItem(); });
+function addItemAt(slot){ const m=cur(); const k=uniqueKey(m,'item_'+slot); m.items[k]={slots:[slot],material:'STONE',name:'<white>New item',lore:[],'left-click':[]}; S.sel=k; touch(); renderAll(); }
+function deleteItem(){ const m=cur(); if(!S.sel||!m.items[S.sel]) return; if(!confirm('Delete item '+S.sel+'?')) return; delete m.items[S.sel]; S.sel=null; touch(); renderAll(); }
+
+/* ---- inspector ---- */
+function field(label, html){ return `<label>${label}</label>${html}`; }
+function inp(path, value, type='text', extra=''){ return `<input type="${type}" value="${esc(value??'')}" ${extra} oninput="setPath('${path}', this.${type==='checkbox'?'checked':'value'}, '${type}')">`; }
+function chk(path, value){ return `<input type="checkbox" ${value?'checked':''} onchange="setPath('${path}', this.checked, 'bool')">`; }
+function setPath(path, value, type){
+  const m=cur(); if(!m) return; const parts=path.split('.'); let o=(parts[0]==='item')?m.items[S.sel]:m; if(parts[0]==='item') parts.shift();
+  const key=parts.pop(); for(const p of parts){ o[p]=o[p]||{}; o=o[p]; }
+  if(type==='number') value = value===''?undefined:Number(value);
+  if(type==='list') value = String(value).split(',').map(s=>s.trim()).filter(Boolean);
+  if(type==='lines') value = String(value).split('\n');
+  if(type==='slots') value = parseSlots(String(value).split(',').map(s=>s.trim()).filter(Boolean), m.rows);
+  if(value===''||value===undefined||(Array.isArray(value)&&!value.length&&key!=='slots')) delete o[key]; else o[key]=value;
+  if(key==='rows'){ for(const k in m.items) m.items[k].slots=m.items[k].slots.filter(s=>s<m.rows*9); }
+  touch(); drawMenu(); renderMenuList();
+}
+function renderInspector(){
+  const m=cur(); const el=$('#inspector');
+  if(!m){ el.innerHTML='<div class="muted">Create or select a menu.</div>'; return; }
+  let h=`<h3>Menu <span class="chip">${esc(S.current)}</span></h3>`;
+  h+=field('Title (MiniMessage)', inp('title', m.title));
+  h+=field('Skin texture', `<select onchange="setPath('texture', this.value)"><option value="">— none —</option>${Object.keys(S.textures).map(n=>`<option ${m.texture===n?'selected':''}>${n}</option>`).join('')}</select>`);
+  h+=`<div class="row">${field('Rows', `<select onchange="setPath('rows', this.value, 'number'); renderAll()">${[1,2,3,4,5,6].map(r=>`<option ${m.rows===r?'selected':''}>${r}</option>`).join('')}</select>`)}${field('Refresh (ticks)', inp('refresh', m.refresh??0, 'number'))}</div>`;
+  h+=`<div class="row">${field('Command', inp('command', m.command))}${field('Aliases (comma)', `<input value="${esc((m.aliases||[]).join(', '))}" onchange="setPath('aliases', this.value, 'list')">`)}</div>`;
+  h+=field('Permission', inp('permission', m.permission));
+  h+=field('Denied worlds (comma)', `<input value="${esc((m['denied-worlds']||[]).join(', '))}" onchange="setPath('denied-worlds', this.value, 'list')">`);
+  h+=field('Bedrock form text', inp('bedrock.content', m.bedrock?.content));
+  h+=`<div class="row" style="margin-top:10px"><button class="small" onclick="renameMenu()">Rename</button><button class="small" onclick="duplicateMenu()">Duplicate</button><button class="small danger" onclick="deleteMenu()">Delete menu</button></div>`;
+  h+=`<div class="row" style="margin-top:6px"><a class="muted" style="font-size:11px" href="${conn.url}/api/yaml/${S.current}?token=${encodeURIComponent(conn.token)}" target="_blank">download YAML (deployed version)</a></div>`;
+  h+='<hr>';
+  const it=S.sel?m.items[S.sel]:null;
+  if(!it){ h+=`<h3>Item</h3><div class="muted">Select a slot. Double-click an empty slot to add an item.</div>`; el.innerHTML=h; return; }
+  h+=`<h3>Item <span class="chip">${esc(S.sel)}</span></h3>`;
+  h+=`<div class="row">${field('Key', `<input value="${esc(S.sel)}" onchange="renameItem(this.value)">`)}${field('Slots', `<input value="${it.slots.join(', ')}" onchange="setPath('item.slots', this.value, 'slots'); drawMenu()">`)}</div>`;
+  h+=`<div class="row">${field('Material', inp('item.material', it.material, 'text', 'list="materialsDl"'))}${field('Amount', inp('item.amount', it.amount??1, 'number', 'min=1 max=99'))}</div>`;
+  h+=field('Name', inp('item.name', it.name));
+  h+=field('Lore (one line each)', `<textarea oninput="setPath('item.lore', this.value, 'lines')">${esc((it.lore||[]).join('\n'))}</textarea>`);
+  h+=`<div class="row"><span>${chk('item.glow', it.glow)} glow</span><span>${chk('item.hide-tooltip', it['hide-tooltip'])} hide tooltip</span>${field('Priority', inp('item.priority', it.priority??0,'number'))}</div>`;
+  h+=`<div class="row">${field('Custom model data', inp('item.custom-model-data', it['custom-model-data'], 'number'))}${field('Item model (ns:path)', inp('item.item-model', it['item-model']))}</div>`;
+  h+=field('Head (player name / %player_name% / base64 / url)', inp('item.head', it.head));
+  h+=`<details ${it.shop?'open':''}><summary class="muted" style="cursor:pointer;margin-top:8px">Shop (auto buy/sell, needs Vault)</summary><div class="row">${field('Buy price', inp('item.shop.buy', it.shop?.buy,'text'))}${field('Sell price', inp('item.shop.sell', it.shop?.sell,'text'))}${field('Per', inp('item.shop.amount', it.shop?.amount,'number'))}</div></details>`;
+  h+=`<details ${it.bedrock?'open':''}><summary class="muted" style="cursor:pointer;margin-top:8px">Bedrock button</summary>${field('Button text', inp('item.bedrock.text', it.bedrock?.text))}${field('Right-click button text', inp('item.bedrock.right-text', it.bedrock?.['right-text']))}${field('Image (textures/items/… or URL)', inp('item.bedrock.image', it.bedrock?.image))}<div style="margin-top:6px">${chk('item.bedrock.hidden', it.bedrock?.hidden)} hide on Bedrock</div></details>`;
+  h+=`<div class="row" style="margin-top:12px"><button class="small" onclick="duplicateItem()">Duplicate</button><button class="small danger" onclick="deleteItem()">Delete item</button></div>`;
+  el.innerHTML=h;
+}
+function renameItem(nk){ const m=cur(); nk=nk.trim().replace(/[^A-Za-z0-9_-]/g,'_'); if(!nk||m.items[nk]) return renderInspector(); m.items[nk]=m.items[S.sel]; delete m.items[S.sel]; S.sel=nk; touch(); renderAll(); }
+function duplicateItem(){ const m=cur(); const k=uniqueKey(m,S.sel); const copy=JSON.parse(JSON.stringify(m.items[S.sel])); const free=[...Array(m.rows*9).keys()].find(s=>!itemAt(m,s)); copy.slots=free!=null?[free]:[]; m.items[k]=copy; S.sel=k; touch(); renderAll(); }
+function renameMenu(){ const id=prompt('New id:', S.current); if(!id) return; const c=id.toLowerCase().replace(/[^a-z0-9_-]/g,'_'); if(S.menus[c]) return toast('Exists',true); S.menus[c]=S.menus[S.current]; delete S.menus[S.current]; S.deletedMenus.add(S.current); S.dirty.delete(S.current); S.dirty.add(c); S.current=c; renderAll(); }
+function duplicateMenu(){ const id=prompt('Id for the copy:', S.current+'_copy'); if(!id) return; const c=id.toLowerCase().replace(/[^a-z0-9_-]/g,'_'); S.menus[c]=JSON.parse(JSON.stringify(cur())); S.menus[c].command=c; S.dirty.add(c); S.current=c; renderAll(); }
+function deleteMenu(){ if(!confirm('Delete menu '+S.current+' (also on the server at next deploy)?')) return; delete S.menus[S.current]; S.deletedMenus.add(S.current); S.dirty.delete(S.current); S.current=Object.keys(S.menus)[0]||null; S.sel=null; renderAll(); }
+
+/* ---- flow editor ---- */
+function renderFlowTabs(){
+  const m=cur(); const tabs = S.sel&&m?.items[S.sel] ? CLICK_TABS : MENU_TABS;
+  if(!tabs.some(t=>t[0]===S.flowTab)) S.flowTab=tabs[0][0];
+  $('#flowTabs').innerHTML = tabs.map(([k,l])=>`<button class="${S.flowTab===k?'on':''}" onclick="S.flowTab='${k}';renderFlowTabs();renderFlow()">${l}${countBadge(m,k)}</button>`).join('') + `<span class="muted" style="margin-left:auto;align-self:center;font-size:11px;padding-right:6px">${S.sel?'item: '+esc(S.sel):'menu-level flows'}</span>`;
+}
+function countBadge(m,k){ const o=S.sel&&m?.items[S.sel]?m.items[S.sel]:m; const n=(o?.[k]||[]).length; return n?` <span class="chip">${n}</span>`:''; }
+function flowTarget(){ const m=cur(); if(!m) return null; const o=S.sel&&m.items[S.sel]?m.items[S.sel]:m; return o; }
+function shorthand(s){ // same rules as FlowParser.fromShorthand
+  const t=s.trim(); if(!t.startsWith('[')) return {type:'message',text:t}; const e=t.indexOf(']'); if(e<0) return {type:'message',text:t};
+  const type=t.slice(1,e).trim().toLowerCase(), rest=t.slice(e+1).trim(); const b={type};
+  switch(type){
+    case 'console': case 'player': case 'command': b.command=rest; break;
+    case 'open': { const p=rest.split(' '); b.menu=p[0]; if(p.length>1) b.args=p.slice(1).join(' '); break; }
+    case 'sound': { const p=rest.split(/[;,] */); b.sound=p[0]; if(p[1]) b.volume=+p[1]; if(p[2]) b.pitch=+p[2]; break; }
+    case 'delay': case 'wait': b.type='delay'; b.ticks=+rest; break;
+    case 'permission': case 'perm': b.type='permission'; b.value=rest; break;
+    case 'money': case 'give-money': b.amount=rest; break;
+    case 'cooldown': { const p=rest.split(' '); b.key=p[0]; if(p[1]) b.duration=p[1]; break; }
+    case 'title': { const p=rest.split(';'); b.title=p[0]; if(p[1]) b.subtitle=p[1]; break; }
+    case 'reset-cooldown': b.key=rest; break;
+    case 'give-item': { const p=rest.split(' '); b.material=p[0]; if(p[1]) b.amount=+p[1]; break; }
+    case 'chance': b.percent=+rest; break;
+    case 'close': case 'back': case 'refresh': break;
+    default: b.text=rest;
+  }
+  return b;
+}
+function normList(list){ return (list||[]).map(x=>typeof x==='string'?shorthand(x):x); }
+function renderFlow(){
+  const o=flowTarget(); const body=$('#flowBody');
+  if(!o){ body.innerHTML='<div class="muted">Select a menu.</div>'; return; }
+  if(S.flowTab==='states'){ renderStates(body, o); return; }
+  o[S.flowTab]=normList(o[S.flowTab]);
+  body.innerHTML = `<div class="muted" style="margin-bottom:8px">${hintFor(S.flowTab)}</div>` + flowHtml(o[S.flowTab], S.flowTab);
+}
+function hintFor(tab){ return ({ 'left-click':'Runs top to bottom on left click. Conditions (orange) stop the flow and run their DENY branch when they fail.',
+  'click':'Fallback for any click type that has no flow of its own.', 'view-requirements':'The item is only shown when all of these pass (keep them silent: no deny messages).',
+  'open-requirements':'Checked before the menu opens.', 'on-open':'Runs after the menu opened.', 'on-close':'Runs when the menu is closed.'})[tab] || 'Runs top to bottom.'; }
+const flowRefs = {}; let flowSeq=0;
+function flowHtml(list, path){
+  flowRefs[path]=list;
+  let h='';
+  list.forEach((b,i)=>{
+    const def=BLOCKS[b.type]||{label:b.type,fields:[]}; const id=path+'.'+i;
+    h+=`<div class="block ${def.cond?'cond':''}"><div class="head"><b>${def.cond?'◆':'▶'} ${esc(def.label)}</b>
+      <button class="small" onclick="moveBlock('${path}',${i},-1)">↑</button><button class="small" onclick="moveBlock('${path}',${i},1)">↓</button>
+      <button class="small" onclick="dupBlock('${path}',${i})">⧉</button><button class="small danger" onclick="delBlock('${path}',${i})">✕</button></div><div class="fields">`;
+    for(const [k,label,type,def2] of def.fields){
+      const v=b[k]??''; let input;
+      if(type==='bool') input=`<input type="checkbox" ${v===true||v==='true'?'checked':''} onchange="setBlock('${path}',${i},'${k}',this.checked)">`;
+      else if(type==='select') input=`<select onchange="setBlock('${path}',${i},'${k}',this.value)">${def2.map(x=>`<option ${v===x?'selected':''}>${x}</option>`).join('')}</select>`;
+      else if(type==='number') input=`<input type="number" step="any" value="${esc(v)}" onchange="setBlock('${path}',${i},'${k}',this.value===''?undefined:+this.value)">`;
+      else if(type==='list') input=`<input value="${esc(Array.isArray(v)?v.join(', '):v)}" onchange="setBlock('${path}',${i},'${k}',this.value.split(',').map(s=>s.trim()).filter(Boolean))">`;
+      else { const dl=type==='material'?'materialsDl':type==='sound'?'soundsDl':type==='menu'?'menusDl':''; input=`<input value="${esc(v)}" ${dl?`list="${dl}"`:''} onchange="setBlock('${path}',${i},'${k}',this.value)">`; }
+      h+=`<div><label>${label}</label>${input}</div>`;
+    }
+    h+='</div>';
+    if(def.cond){ b.deny=normList(b.deny); h+=`<div class="deny"><div class="tag">DENY ▸ runs when the check fails</div>${flowHtml(b.deny, id+'.deny')}</div>`; }
+    h+='</div>';
+  });
+  h+=`<div class="addrow"><select id="add_${path.replace(/[^a-z0-9]/gi,'_')}"><optgroup label="Conditions">${Object.entries(BLOCKS).filter(([,d])=>d.cond).map(([k,d])=>`<option value="${k}">${d.label}</option>`).join('')}</optgroup><optgroup label="Actions">${Object.entries(BLOCKS).filter(([,d])=>!d.cond).map(([k,d])=>`<option value="${k}">${d.label}</option>`).join('')}</optgroup></select><button class="small" onclick="addBlock('${path}')">+ Add block</button></div>`;
+  return h;
+}
+function addBlock(path){ const sel=document.getElementById('add_'+path.replace(/[^a-z0-9]/gi,'_')); const type=sel.value; const def=BLOCKS[type]; const b={type}; for(const [k,,t,d] of def.fields){ if(d!==undefined && t!=='select') b[k]=d; else if(t==='select') b[k]=d[0]; } if(def.cond) b.deny=[]; flowRefs[path].push(b); touch(); renderFlow(); renderFlowTabs(); }
+function setBlock(path,i,k,v){ const b=flowRefs[path][i]; if(v===undefined||v===''||(Array.isArray(v)&&!v.length)) delete b[k]; else b[k]=v; touch(); renderMenuList(); }
+function delBlock(path,i){ flowRefs[path].splice(i,1); touch(); renderFlow(); renderFlowTabs(); }
+function dupBlock(path,i){ flowRefs[path].splice(i+1,0,JSON.parse(JSON.stringify(flowRefs[path][i]))); touch(); renderFlow(); renderFlowTabs(); }
+function moveBlock(path,i,d){ const l=flowRefs[path]; const j=i+d; if(j<0||j>=l.length) return; [l[i],l[j]]=[l[j],l[i]]; touch(); renderFlow(); }
+function renderStates(body, it){
+  it.states=it.states||[];
+  let h='<div class="muted" style="margin-bottom:8px">States change how the item looks when their requirements pass (first match wins). Example: a clock icon while a cooldown is running. Empty fields inherit from the item.</div>';
+  it.states.forEach((st,i)=>{
+    st.requirements=normList(st.requirements);
+    h+=`<div class="block cond"><div class="head"><b>◆ State <input style="width:140px;display:inline" value="${esc(st.label||'state')}" onchange="setState(${i},'label',this.value)"></b><button class="small danger" onclick="cur().items[S.sel].states.splice(${i},1);touch();renderFlow()">✕</button></div>
+      <div class="fields"><div><label>Material</label><input list="materialsDl" value="${esc(st.material||'')}" onchange="setState(${i},'material',this.value)"></div><div><label>Name</label><input value="${esc(st.name||'')}" onchange="setState(${i},'name',this.value)"></div><div><label>Amount</label><input type="number" value="${esc(st.amount??'')}" onchange="setState(${i},'amount',this.value===''?undefined:+this.value)"></div><div><label>Glow</label><select onchange="setState(${i},'glow',this.value===''?undefined:this.value==='true')"><option value="" ${st.glow==null?'selected':''}>inherit</option><option value="true" ${st.glow===true?'selected':''}>on</option><option value="false" ${st.glow===false?'selected':''}>off</option></select></div></div>
+      <div><label>Lore (one line each)</label><textarea onchange="setState(${i},'lore',this.value?this.value.split('\\n'):undefined)">${esc((st.lore||[]).join('\n'))}</textarea></div>
+      <div class="deny"><div class="tag">REQUIREMENTS ▸ state applies when all pass</div>${flowHtml(st.requirements, 'states.'+i+'.req')}</div></div>`;
+  });
+  h+=`<button class="small" onclick="cur().items[S.sel].states.push({label:'state_'+(cur().items[S.sel].states.length+1),requirements:[]});touch();renderFlow()">+ Add state</button>`;
+  body.innerHTML=h;
+}
+function setState(i,k,v){ const st=cur().items[S.sel].states[i]; if(v===undefined||v===''){ delete st[k]; } else st[k]=v; touch(); }
+
+/* =============================== deploy / export =============================== */
+function exportMenu(m){
+  const out=JSON.parse(JSON.stringify(m));
+  for(const k in out.items){ const it=out.items[k]; for(const [tab] of CLICK_TABS){ if(Array.isArray(it[tab])&&!it[tab].length) delete it[tab]; }
+    if(it.states && !it.states.length) delete it.states;
+    if(it.shop && !Object.keys(it.shop).length) delete it.shop; if(it.bedrock && !Object.keys(it.bedrock).length) delete it.bedrock; }
+  for(const [tab] of MENU_TABS) if(Array.isArray(out[tab])&&!out[tab].length) delete out[tab];
+  if(out.bedrock && !Object.keys(out.bedrock).length) delete out.bedrock;
+  return out;
+}
+async function deploy(){
+  const payload={menus:{},textures:{},deleteMenus:[...S.deletedMenus],deleteTextures:[...S.deletedTextures]};
+  for(const id of S.dirty) if(S.menus[id]) payload.menus[id]=exportMenu(S.menus[id]);
+  for(const n of S.dirtyTex) if(S.textures[n]) payload.textures[n]=S.textures[n].dataURL;
+  if(!Object.keys(payload.menus).length&&!Object.keys(payload.textures).length&&!payload.deleteMenus.length&&!payload.deleteTextures.length) return toast('Nothing changed.');
+  try{ const r=await (await api('deploy',{method:'POST',body:JSON.stringify(payload)})).json(); if(!r.ok) throw new Error(r.error);
+    toast(`Deployed: ${r.written} menu file(s) written, ${r.menus} loaded${r.packRebuilt?', resource pack rebuilt':''}.`); S.dirty.clear(); S.dirtyTex.clear(); S.deletedMenus.clear(); S.deletedTextures.clear(); renderMenuList(); renderTexList();
+  }catch(e){ toast('Deploy failed: '+e.message, true); }
+}
+async function openInGame(){ const p=$('#playerSelect').value; if(!p||!S.current) return toast('Pick a player and a menu',true); if(S.dirty.has(S.current)&&confirm('Menu has unsaved changes. Deploy first?')) await deploy(); try{ const r=await (await api('open',{method:'POST',body:JSON.stringify({player:p,menu:S.current})})).json(); toast(r.ok?'Opened for '+p:'Failed: '+r.error, !r.ok);}catch(e){toast(e.message,true);} }
+function exportProject(){ const data={menus:S.menus,textures:Object.fromEntries(Object.entries(S.textures).map(([n,t])=>[n,t.dataURL]))}; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'})); a.download='menuforge-project.json'; a.click(); }
+function importProject(){ const i=document.createElement('input'); i.type='file'; i.accept='.json'; i.onchange=async()=>{ const d=JSON.parse(await i.files[0].text()); for(const id in d.menus){ S.menus[id]=normalizeMenu(id,d.menus[id]); S.dirty.add(id);} for(const n in d.textures||{}){ S.textures[n]={dataURL:d.textures[n], img:await loadImage(d.textures[n])}; S.dirtyTex.add(n);} S.current=Object.keys(S.menus)[0]; renderAll(); toast('Imported'); }; i.click(); }
+
+/* =============================== texture studio =============================== */
+const T={name:'', w:256, h:256, off:null, ctx:null, zoom:3, tool:'pencil', color:'#c6c6c6', size:1, undo:[], redo:[], down:false, start:null, rows:3, guides:true, fillRect:false};
+const PALETTE=['#000000','#1d1d21','#474f52','#8b8b8b','#c6c6c6','#ffffff','#373737','#555555','#b02e26','#f9801d','#fed83d','#80c71f','#5e7c16','#3ab3da','#169c9c','#3c44aa','#8932b8','#c74ebd','#f38baa','#835432','#a0522d','#ffd700','#4ea1ff','#bfe4fb','#2b5aa8','#1a3d75','#7fb2ff','#e8f4ff'];
+function showTab(t){ S.tab=t; $('#tabMenus').className=t==='menus'?'on':''; $('#tabTextures').className=t==='textures'?'on':''; $('#studio').className=t==='textures'?'on':''; for(const id of ['center','flow','inspector']) $('#'+id).style.display=t==='menus'?'':'none'; if(t==='textures'){ if(!T.off) newTexture(3); renderTools(); drawTex(); } }
+function newTexture(rows, blank){ T.rows=rows; T.w=256; T.h=256; T.off=document.createElement('canvas'); T.off.width=T.w; T.off.height=T.h; T.ctx=T.off.getContext('2d',{willReadFrequently:true}); if(!blank) drawFrame(T.ctx, rows); T.undo=[]; T.redo=[]; T.name=T.name||'my_skin'; drawTex(); renderTools(); }
+async function openTexture(name){ showTab('textures'); const t=S.textures[name]; T.name=name; T.off=document.createElement('canvas'); T.off.width=t.img.width; T.off.height=t.img.height; T.w=T.off.width; T.h=T.off.height; T.ctx=T.off.getContext('2d',{willReadFrequently:true}); T.ctx.drawImage(t.img,0,0); T.undo=[]; T.redo=[]; drawTex(); renderTools(); }
+function importPng(){ const i=document.createElement('input'); i.type='file'; i.accept='image/png'; i.onchange=async()=>{ const url=URL.createObjectURL(i.files[0]); const img=await loadImage(url); T.off=document.createElement('canvas'); T.off.width=img.width; T.off.height=img.height; T.w=img.width; T.h=img.height; T.ctx=T.off.getContext('2d',{willReadFrequently:true}); T.ctx.drawImage(img,0,0); T.name=T.name||i.files[0].name.replace(/\.png$/i,'').toLowerCase().replace(/[^a-z0-9_-]/g,'_'); T.undo=[]; drawTex(); renderTools(); }; i.click(); }
+function drawTex(){ const cv=$('#tex'); cv.width=T.w*T.zoom; cv.height=T.h*T.zoom; const c=cv.getContext('2d'); c.imageSmoothingEnabled=false; c.drawImage(T.off,0,0,cv.width,cv.height);
+  if(T.guides){ c.save(); c.scale(T.zoom,T.zoom); c.strokeStyle='rgba(255,140,26,.6)'; c.lineWidth=1/T.zoom; c.strokeRect(0.5/T.zoom,0.5/T.zoom,GUI_W,guiH(T.rows)); for(let r=0;r<T.rows;r++) for(let k=0;k<9;k++) c.strokeRect(SLOT_X+k*SLOT, SLOT_Y+r*SLOT, 16, 16); c.restore(); } }
+function renderTools(){
+  const tools=[['pencil','✎'],['eraser','◻'],['fill','▣'],['line','╱'],['rect','▭'],['pick','✦']];
+  $('#tools').innerHTML=`<h3>Texture studio</h3>
+   <label>Name</label><input value="${esc(T.name)}" onchange="T.name=this.value.toLowerCase().replace(/[^a-z0-9_-]/g,'_')">
+   <div class="row" style="margin-top:8px"><button class="small primary" onclick="saveTexture()">Save to project</button><button class="small" onclick="exportPng()">PNG</button></div>
+   <div class="row" style="margin-top:6px"><select id="tplRows">${[1,2,3,4,5,6].map(r=>`<option value="${r}" ${r===T.rows?'selected':''}>${r} rows</option>`).join('')}</select><button class="small" onclick="T.name='';newTexture(+tplRows.value)">New from template</button></div>
+   <div class="row" style="margin-top:6px"><button class="small" onclick="importPng()">Import PNG</button><button class="small" onclick="newTexture(+tplRows.value,true)">Blank</button></div>
+   <label>Tools</label><div class="toolgrid">${tools.map(([t,i])=>`<button class="${T.tool===t?'on':''}" title="${t}" onclick="T.tool='${t}';renderTools()">${i}</button>`).join('')}<button onclick="undo()" title="undo">↶</button><button onclick="redo()" title="redo">↷</button></div>
+   <div class="row" style="margin-top:6px"><span><label>Size</label><input type="range" min="1" max="6" value="${T.size}" oninput="T.size=+this.value"></span><span><label>Zoom</label><input type="range" min="1" max="8" value="${T.zoom}" oninput="T.zoom=+this.value;drawTex()"></span></div>
+   <div class="row" style="margin-top:6px"><span><input type="checkbox" ${T.guides?'checked':''} onchange="T.guides=this.checked;drawTex()"> slot guides</span><span><input type="checkbox" ${T.fillRect?'checked':''} onchange="T.fillRect=this.checked"> filled rect</span></div>
+   <label>Colour</label><div class="row"><input type="color" value="${T.color}" oninput="T.color=this.value;renderTools()" style="height:32px;padding:2px"><input value="${T.color}" onchange="T.color=this.value;renderTools()"></div>
+   <div class="palette">${PALETTE.map(c=>`<div style="background:${c}" class="${c===T.color?'on':''}" onclick="T.color='${c}';renderTools()"></div>`).join('')}</div>
+   <hr><div class="muted" style="font-size:11px">Draw the GUI at the top-left corner (orange guide = container ${GUI_W}×${guiH(T.rows)} px). The image becomes a font glyph; the plugin shifts it so the top-left lands on the inventory frame. Keep the title area free or draw your own title.</div>
+   ${S.textures[T.name]?.title?`<label>Title for other plugins (DeluxeMenus etc.)</label><div class="row"><input readonly value="${esc(S.textures[T.name].title)}"><button class="small" onclick="navigator.clipboard.writeText(${JSON.stringify(S.textures[T.name].title)});toast('Copied')">Copy</button></div><div class="muted" style="font-size:11px">Paste as the menu title; make sure players get the pack from ${esc(S.server?.packUrl||'the plugin')}.</div>`:'<div class="muted" style="font-size:11px;margin-top:6px">Deploy to get a copyable title for other plugins.</div>'}`;
+}
+function snapshot(){ T.undo.push(T.ctx.getImageData(0,0,T.w,T.h)); if(T.undo.length>40) T.undo.shift(); T.redo=[]; }
+function undo(){ if(!T.undo.length) return; T.redo.push(T.ctx.getImageData(0,0,T.w,T.h)); T.ctx.putImageData(T.undo.pop(),0,0); drawTex(); }
+function redo(){ if(!T.redo.length) return; T.undo.push(T.ctx.getImageData(0,0,T.w,T.h)); T.ctx.putImageData(T.redo.pop(),0,0); drawTex(); }
+function texPos(e){ const r=$('#tex').getBoundingClientRect(); return [Math.floor((e.clientX-r.left)/T.zoom), Math.floor((e.clientY-r.top)/T.zoom)]; }
+function hex2rgba(h){ return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16),255]; }
+function plot(x,y,erase){ const s=T.size, o=Math.floor(s/2); if(erase) T.ctx.clearRect(x-o,y-o,s,s); else { T.ctx.fillStyle=T.color; T.ctx.fillRect(x-o,y-o,s,s); } }
+function lineTo(x0,y0,x1,y1,erase){ const dx=Math.abs(x1-x0), dy=Math.abs(y1-y0), sx=x0<x1?1:-1, sy=y0<y1?1:-1; let err=dx-dy; for(;;){ plot(x0,y0,erase); if(x0===x1&&y0===y1) break; const e2=2*err; if(e2>-dy){err-=dy;x0+=sx;} if(e2<dx){err+=dx;y0+=sy;} } }
+function floodFill(x,y){ const img=T.ctx.getImageData(0,0,T.w,T.h), d=img.data, idx=(x,y)=>(y*T.w+x)*4; const target=[...d.slice(idx(x,y),idx(x,y)+4)], col=hex2rgba(T.color); if(target.every((v,i)=>v===col[i])) return; const stack=[[x,y]]; const same=(i)=>d[i]===target[0]&&d[i+1]===target[1]&&d[i+2]===target[2]&&d[i+3]===target[3];
+  while(stack.length){ const [px,py]=stack.pop(); if(px<0||py<0||px>=T.w||py>=T.h) continue; const i=idx(px,py); if(!same(i)) continue; d[i]=col[0];d[i+1]=col[1];d[i+2]=col[2];d[i+3]=col[3]; stack.push([px+1,py],[px-1,py],[px,py+1],[px,py-1]); } T.ctx.putImageData(img,0,0); }
+let preview=null;
+$('#tex').addEventListener('mousedown', e=>{ const [x,y]=texPos(e); T.down=true; T.start=[x,y];
+  if(T.tool==='pick'){ const p=T.ctx.getImageData(x,y,1,1).data; if(p[3]) { T.color='#'+[p[0],p[1],p[2]].map(v=>v.toString(16).padStart(2,'0')).join(''); renderTools(); } T.down=false; return; }
+  snapshot(); if(T.tool==='pencil'||T.tool==='eraser') plot(x,y,T.tool==='eraser'); else if(T.tool==='fill') floodFill(x,y); else preview=T.ctx.getImageData(0,0,T.w,T.h); drawTex(); });
+$('#tex').addEventListener('mousemove', e=>{ if(!T.down) return; const [x,y]=texPos(e);
+  if(T.tool==='pencil'||T.tool==='eraser'){ lineTo(T.start[0],T.start[1],x,y,T.tool==='eraser'); T.start=[x,y]; }
+  else if(T.tool==='line'||T.tool==='rect'){ T.ctx.putImageData(preview,0,0); shape(x,y); } drawTex(); });
+window.addEventListener('mouseup', e=>{ if(!T.down) return; T.down=false; preview=null; drawTex(); });
+function shape(x,y){ const [sx,sy]=T.start; if(T.tool==='line') lineTo(sx,sy,x,y,false); else { const x0=Math.min(sx,x),y0=Math.min(sy,y),w=Math.abs(x-sx)+1,h=Math.abs(y-sy)+1; T.ctx.fillStyle=T.color; if(T.fillRect) T.ctx.fillRect(x0,y0,w,h); else { T.ctx.fillRect(x0,y0,w,T.size); T.ctx.fillRect(x0,y0+h-T.size,w,T.size); T.ctx.fillRect(x0,y0,T.size,h); T.ctx.fillRect(x0+w-T.size,y0,T.size,h); } } }
+async function saveTexture(){ if(!T.name) return toast('Give the texture a name',true); const dataURL=T.off.toDataURL('image/png'); S.textures[T.name]={...(S.textures[T.name]||{}), dataURL, img:await loadImage(dataURL)}; S.dirtyTex.add(T.name); renderTexList(); toast('Saved "'+T.name+'" – press Deploy to upload and rebuild the pack.'); }
+function exportPng(){ const a=document.createElement('a'); a.href=T.off.toDataURL('image/png'); a.download=(T.name||'texture')+'.png'; a.click(); }
+
+/* =============================== boot =============================== */
+window.addEventListener('beforeunload', e=>{ if(S.dirty.size||S.dirtyTex.size){ e.preventDefault(); e.returnValue=''; } });
+setInterval(()=>{ $('#menusDl').innerHTML=Object.keys(S.menus).map(m=>`<option value="${m}">`).join(''); }, 2000);
+loadState();
+</script>
+</body>
+</html>

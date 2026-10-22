@@ -1,0 +1,56 @@
+# Automatic shop: "shop: {buy, sell}" generates buy/sell flows and lore (needs Vault).
+title: "<dark_gray>Shop"
+rows: 4
+command: shop
+refresh: 0
+open-requirements:
+  - type: permission
+    value: shop.use
+    deny:
+      - "[message] <red>You are not allowed to use the shop yet."
+items:
+  diamond:
+    slot: 10
+    material: DIAMOND
+    shop: { buy: 500, sell: 250 }
+  iron:
+    slot: 11
+    material: IRON_INGOT
+    amount: 16
+    shop: { buy: 160, sell: 64, amount: 16 }
+  gold:
+    slot: 12
+    material: GOLD_INGOT
+    amount: 8
+    shop: { buy: 200, sell: 80, amount: 8 }
+  bread:
+    slot: 13
+    material: BREAD
+    amount: 16
+    shop: { buy: 40, sell: 10, amount: 16 }
+  arrows:
+    slot: 14
+    material: ARROW
+    amount: 32
+    shop: { buy: 64, sell: 16, amount: 32 }
+  oak:
+    slot: 15
+    material: OAK_LOG
+    amount: 32
+    shop: { buy: 48, sell: 16, amount: 32 }
+  bow:
+    slot: 16
+    material: BOW
+    shop: { buy: 150 }
+  balance:
+    slot: 31
+    material: GOLD_NUGGET
+    name: "<gold>Balance: <white>%money%"
+    lore:
+      - "<gray>Left click buys, right click sells."
+  back:
+    slot: 27
+    material: ARROW
+    name: "<gray>Back"
+    left-click:
+      - "[back]"

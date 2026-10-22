@@ -1,0 +1,31 @@
+# Network selector: sends players to other servers with your proxy's command.
+title: "<dark_gray>Choose a server"
+rows: 3
+command: servers
+aliases: [hubselect]
+items:
+  survival:
+    slot: 11
+    material: GRASS_BLOCK
+    name: "<green>Survival"
+    lore: ["<gray>Classic survival with claims."]
+    left-click:
+      - "[close]"
+      - "[player] /server survival"
+    bedrock: { image: "textures/blocks/grass_side_carried" }
+  skyblock:
+    slot: 13
+    material: OAK_SAPLING
+    name: "<aqua>Skyblock"
+    lore: ["<gray>Start on a tiny island."]
+    left-click:
+      - "[close]"
+      - "[player] /server skyblock"
+  minigames:
+    slot: 15
+    material: FIREWORK_ROCKET
+    name: "<yellow>Minigames"
+    lore: ["<gray>Quick rounds of fun."]
+    left-click:
+      - "[close]"
+      - "[player] /server minigames"

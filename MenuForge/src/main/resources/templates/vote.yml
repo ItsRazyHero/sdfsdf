@@ -1,0 +1,28 @@
+title: "<dark_gray>Vote for us"
+rows: 3
+command: vote
+items:
+  site1:
+    slot: 11
+    material: PAPER
+    name: "<yellow>Vote site #1"
+    lore: ["<gray>Click for the link."]
+    left-click:
+      - "[message] <yellow><click:open_url:'https://example.com/vote1'><u>Click here to vote</u></click>"
+      - "[close]"
+  site2:
+    slot: 13
+    material: PAPER
+    name: "<yellow>Vote site #2"
+    left-click:
+      - "[message] <yellow><click:open_url:'https://example.com/vote2'><u>Click here to vote</u></click>"
+      - "[close]"
+  reward:
+    slot: 15
+    material: GOLD_BLOCK
+    name: "<gold>Daily vote reward"
+    lore: ["<gray>Available: <white>%cooldown_vote_reward%"]
+    left-click:
+      - { type: cooldown, key: vote_reward, duration: 1d, deny: ["[message] <red>Come back in %cooldown_vote_reward%."] }
+      - "[console] give %player_name% gold_ingot 3"
+      - "[message] <green>Thanks for voting!"

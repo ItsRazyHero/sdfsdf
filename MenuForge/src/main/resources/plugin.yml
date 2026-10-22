@@ -1,0 +1,24 @@
+name: MenuForge
+version: '${version}'
+main: io.github.itsrazyhero.menuforge.MenuForgePlugin
+api-version: '1.21'
+description: No-code chest GUI builder for Java + Bedrock (web editor, click flows, inventory skins)
+author: ItsRazyHero
+softdepend: [PlaceholderAPI, Vault, floodgate, Geyser-Spigot]
+
+commands:
+  menuforge:
+    description: MenuForge main command
+    usage: /<command> <open|reload|list|create|pack|title|cooldown|editor>
+    aliases: [mf, menus]
+
+permissions:
+  menuforge.admin:
+    description: Manage menus, reload, deploy
+    default: op
+  menuforge.open.others:
+    description: Open menus for other players
+    default: op
+  menuforge.bypass.cooldown:
+    description: Ignore item cooldowns
+    default: false

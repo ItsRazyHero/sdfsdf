@@ -1,0 +1,10 @@
+main
+daily_gifts
+shop
+warps
+kits
+quests
+server_selector
+profile
+settings
+vote
